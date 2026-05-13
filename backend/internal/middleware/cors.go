@@ -1,20 +1,16 @@
 package middleware
 
-import (
-	"strings"
+import "net/http"
 
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/cors"
-)
-
-// CORSMiddleware configures CORS for the Fiber app.
-func CORSMiddleware(allowedOrigins []string) fiber.Handler {
-	origins := strings.Join(allowedOrigins, ",")
-	return cors.New(cors.Config{
-		AllowOrigins:     origins,
-		AllowMethods:     "GET,POST,PUT,PATCH,DELETE,OPTIONS",
-		AllowHeaders:     "Origin,Content-Type,Accept,Authorization,X-Request-ID",
-		AllowCredentials: true,
-		MaxAge:           86400, // 24 hours preflight cache
+func CORS(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		next.ServeHTTP(w, r)
 	})
 }
