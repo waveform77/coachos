@@ -1,0 +1,1 @@
+ALTER TABLE players ADD COLUMN potential_ability INT NOT NULL DEFAULT 0;

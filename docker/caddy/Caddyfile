@@ -1,0 +1,29 @@
+# CoachOS Caddy reverse proxy configuration
+# For production: replace localhost with your domain
+
+api.localhost {
+    reverse_proxy backend:8080 {
+        header_up Host {host}
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+    }
+    
+    log {
+        output stdout
+        format json
+    }
+}
+
+app.localhost {
+    reverse_proxy frontend:80 {
+        header_up Host {host}
+    }
+}
+
+# Production example:
+# api.coachos.dev {
+#     reverse_proxy backend:8080
+# }
+# app.coachos.dev {
+#     reverse_proxy frontend:80
+# }

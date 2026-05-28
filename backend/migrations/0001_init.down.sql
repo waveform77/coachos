@@ -1,0 +1,44 @@
+-- Drop tables in reverse dependency order
+DROP TABLE IF EXISTS audit_logs CASCADE;
+DROP TABLE IF EXISTS ai_recommendations CASCADE;
+DROP TABLE IF EXISTS reports CASCADE;
+DROP TABLE IF EXISTS notifications CASCADE;
+DROP TABLE IF EXISTS match_events CASCADE;
+DROP TABLE IF EXISTS match_lineups CASCADE;
+DROP TABLE IF EXISTS matches CASCADE;
+DROP TABLE IF EXISTS player_goals CASCADE;
+DROP TABLE IF EXISTS player_assessments CASCADE;
+DROP TABLE IF EXISTS attendance_records CASCADE;
+DROP TABLE IF EXISTS session_exercises CASCADE;
+DROP TABLE IF EXISTS training_blocks CASCADE;
+DROP TABLE IF EXISTS training_sessions CASCADE;
+DROP TABLE IF EXISTS exercises CASCADE;
+DROP TABLE IF EXISTS player_parents CASCADE;
+DROP TABLE IF EXISTS parents CASCADE;
+DROP TABLE IF EXISTS team_members CASCADE;
+DROP TABLE IF EXISTS players CASCADE;
+DROP TABLE IF EXISTS teams CASCADE;
+DROP TABLE IF EXISTS coach_profiles CASCADE;
+DROP TABLE IF EXISTS refresh_tokens CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+DROP TABLE IF EXISTS clubs CASCADE;
+
+-- Drop enums
+DROP TYPE IF EXISTS role_enum CASCADE;
+DROP TYPE IF EXISTS age_group_enum CASCADE;
+DROP TYPE IF EXISTS position_enum CASCADE;
+DROP TYPE IF EXISTS dominant_foot_enum CASCADE;
+DROP TYPE IF EXISTS session_status_enum CASCADE;
+DROP TYPE IF EXISTS session_intensity_enum CASCADE;
+DROP TYPE IF EXISTS block_kind_enum CASCADE;
+DROP TYPE IF EXISTS exercise_category_enum CASCADE;
+DROP TYPE IF EXISTS attendance_status_enum CASCADE;
+DROP TYPE IF EXISTS match_status_enum CASCADE;
+DROP TYPE IF EXISTS match_event_type_enum CASCADE;
+DROP TYPE IF EXISTS lineup_role_enum CASCADE;
+DROP TYPE IF EXISTS goal_status_enum CASCADE;
+DROP TYPE IF EXISTS notification_type_enum CASCADE;
+DROP TYPE IF EXISTS report_type_enum CASCADE;
+DROP TYPE IF EXISTS ai_target_type_enum CASCADE;
+DROP TYPE IF EXISTS license_level_enum CASCADE;
+DROP TYPE IF EXISTS relation_enum CASCADE;

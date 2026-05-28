@@ -1,0 +1,63 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: coachos_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-coachos_db}
+      POSTGRES_USER: ${DB_USER:-coachos}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-coachos_secret}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    # Host :5432 часто занят локальным PostgreSQL — снаружи 5433, внутри контейнера 5432
+    ports:
+      - "${POSTGRES_HOST_PORT:-5433}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-coachos} -d ${DB_NAME:-coachos_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - coachos_network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: coachos_backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - ./backend/.env
+    environment:
+      DB_HOST: postgres
+      DB_PORT: "5432"
+    ports:
+      - "8080:8080"
+    networks:
+      - coachos_network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:8080/api/v1}
+    container_name: coachos_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    networks:
+      - coachos_network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  coachos_network:
+    driver: bridge
