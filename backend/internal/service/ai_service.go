@@ -222,6 +222,73 @@ func (s *AIService) AnalyzePlayer(ctx context.Context, coachID string, req dto.A
 	}, nil
 }
 
+// GetMyInsights returns the latest saved AI analysis and progress summary for the current user.
+func (s *AIService) GetMyInsights(ctx context.Context, userID string) (*dto.AIResponse, error) {
+	player, err := s.playerRepo.FindByUserID(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	recs, err := s.aiRepo.GetByTarget(ctx, domain.AITargetPlayer, player.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	var result dto.AIResponse
+	for _, rec := range recs {
+		var analysis ai.AnalyzePlayerResponse
+		if err := json.Unmarshal(rec.Response, &analysis); err == nil && len(analysis.Strengths) > 0 {
+			result.Analysis = &dto.AIPlayerAnalysis{
+				Strengths:       analysis.Strengths,
+				Weaknesses:      analysis.Weaknesses,
+				Recommendations: analysis.Recommendations,
+				DevIndex:        analysis.DevIndex,
+				Summary:         analysis.Summary,
+			}
+			continue
+		}
+
+		var progress ai.SummarizeProgressResponse
+		if err := json.Unmarshal(rec.Response, &progress); err == nil && progress.Trend != "" {
+			result.Progress = &dto.AIProgressSummary{
+				Summary:    progress.Summary,
+				Trend:      progress.Trend,
+				Highlights: progress.Highlights,
+				Alerts:     progress.Alerts,
+			}
+		}
+	}
+
+	if result.Analysis == nil && result.Progress == nil {
+		return nil, domain.ErrNotFound
+	}
+
+	return &result, nil
+}
+
+// GenerateMyInsights generates fresh AI analysis and progress summary for the current user.
+func (s *AIService) GenerateMyInsights(ctx context.Context, userID string) (*dto.AIResponse, error) {
+	player, err := s.playerRepo.FindByUserID(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	analysisResp, err := s.AnalyzePlayer(ctx, userID, dto.AnalyzePlayerRequest{PlayerID: player.ID})
+	if err != nil {
+		return nil, err
+	}
+
+	progressResp, err := s.SummarizeProgress(ctx, userID, dto.SummarizeProgressRequest{PlayerID: player.ID, PeriodDays: 30})
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.AIResponse{
+		Analysis: analysisResp.Analysis,
+		Progress: progressResp.Progress,
+	}, nil
+}
+
 // SummarizeProgress summarizes a player's progress over a period.
 func (s *AIService) SummarizeProgress(ctx context.Context, coachID string, req dto.SummarizeProgressRequest) (*dto.AIResponse, error) {
 	player, err := s.playerRepo.FindByID(ctx, req.PlayerID)

@@ -68,4 +68,8 @@ export const queryKeys = {
   medical: {
     player: (playerId: string) => ['medical', 'player', playerId] as const,
   },
+  me: {
+    reports: () => ['me', 'reports'] as const,
+    aiInsights: () => ['me', 'ai-insights'] as const,
+  },
 } as const

@@ -2,7 +2,9 @@ package handler
 
 import (
 	"github.com/coachos/backend/internal/domain"
+	"github.com/coachos/backend/internal/dto"
 	pkgjwt "github.com/coachos/backend/internal/pkg/jwt"
+	"github.com/coachos/backend/internal/repository"
 	"github.com/coachos/backend/internal/service"
 	"github.com/gofiber/fiber/v2"
 )
@@ -117,4 +119,41 @@ func (h *AnalyticsHandler) GetPlayerForm(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(form)
+}
+
+// GetMyReports handles GET /api/v1/me/reports.
+func (h *AnalyticsHandler) GetMyReports(c *fiber.Ctx) error {
+	claims := c.Locals("user").(*pkgjwt.Claims)
+	userID := claims.UserID
+
+	analytics, err := h.analyticsService.PlayerAnalytics(c.UserContext(), userID, claims)
+	if err != nil {
+		return err
+	}
+
+	playerID := analytics.PlayerID
+
+	repoMatchStats, err := h.analyticsService.GetPlayerMatchStats(c.UserContext(), playerID)
+	if err != nil {
+		repoMatchStats = &repository.PlayerMatchStats{}
+	}
+	matchStats := &dto.PlayerMatchStats{
+		Goals:         repoMatchStats.Goals,
+		Assists:       repoMatchStats.Assists,
+		YellowCards:   repoMatchStats.YellowCards,
+		RedCards:      repoMatchStats.RedCards,
+		MinutesPlayed: repoMatchStats.MinutesPlayed,
+		MatchesPlayed: repoMatchStats.MatchesPlayed,
+	}
+
+	form, err := h.analyticsService.CalculatePlayerForm(c.UserContext(), playerID)
+	if err != nil {
+		form = &dto.PlayerFormResponse{}
+	}
+
+	return c.JSON(dto.MyReportsResponse{
+		Analytics:  analytics,
+		MatchStats: matchStats,
+		Form:       form,
+	})
 }

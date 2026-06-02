@@ -84,6 +84,30 @@ function normalizePlayerAnalytics(raw: Record<string, unknown>): PlayerAnalytics
   }
 }
 
+export type MatchStats = {
+  goals: number
+  assists: number
+  yellowCards: number
+  redCards: number
+  minutesPlayed: number
+  matchesPlayed: number
+}
+
+export type PlayerForm = {
+  form: string
+  label: string
+  trend: string
+  avgScore: number
+  attendance: number
+  matchCount: number
+}
+
+export type MyReportsResponse = {
+  analytics: PlayerAnalytics
+  matchStats: MatchStats
+  form: PlayerForm
+}
+
 export const analyticsApi = {
   getCoachDashboard: () =>
     apiClient.get<CoachDashboard>(API_ENDPOINTS.ANALYTICS.COACH_DASHBOARD).then((r) => r.data),
@@ -107,22 +131,11 @@ export const analyticsApi = {
       .then((r) => mapWeeklyLoadToTrainingLoad(r.data.weeklyLoad ?? [])),
 
   getPlayerMatchStats: (playerId: string) =>
-    apiClient.get<{
-      goals: number
-      assists: number
-      yellowCards: number
-      redCards: number
-      minutesPlayed: number
-      matchesPlayed: number
-    }>(`${API_ENDPOINTS.ANALYTICS.PLAYER(playerId)}/match-stats`).then((r) => r.data),
+    apiClient.get<MatchStats>(`${API_ENDPOINTS.ANALYTICS.PLAYER(playerId)}/match-stats`).then((r) => r.data),
 
   getPlayerForm: (playerId: string) =>
-    apiClient.get<{
-      form: string
-      label: string
-      trend: string
-      avgScore: number
-      attendance: number
-      matchCount: number
-    }>(`${API_ENDPOINTS.ANALYTICS.PLAYER(playerId)}/form`).then((r) => r.data),
+    apiClient.get<PlayerForm>(`${API_ENDPOINTS.ANALYTICS.PLAYER(playerId)}/form`).then((r) => r.data),
+
+  getMyReports: () =>
+    apiClient.get<MyReportsResponse>(API_ENDPOINTS.ME.REPORTS).then((r) => r.data),
 }

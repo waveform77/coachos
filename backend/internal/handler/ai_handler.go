@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"errors"
+
 	"github.com/coachos/backend/internal/domain"
 	"github.com/coachos/backend/internal/dto"
 	pkgjwt "github.com/coachos/backend/internal/pkg/jwt"
@@ -89,6 +91,31 @@ func (h *AIHandler) SummarizeProgress(c *fiber.Ctx) error {
 	}
 
 	resp, err := h.aiService.SummarizeProgress(c.UserContext(), claims.UserID, req)
+	if err != nil {
+		return err
+	}
+	return c.JSON(resp)
+}
+
+// GetMyInsights handles GET /api/v1/me/ai/insights.
+func (h *AIHandler) GetMyInsights(c *fiber.Ctx) error {
+	claims := c.Locals("user").(*pkgjwt.Claims)
+
+	resp, err := h.aiService.GetMyInsights(c.UserContext(), claims.UserID)
+	if err != nil {
+		if errors.Is(err, domain.ErrNotFound) {
+			return c.JSON(dto.AIResponse{})
+		}
+		return err
+	}
+	return c.JSON(resp)
+}
+
+// GenerateMyInsights handles POST /api/v1/me/ai/insights.
+func (h *AIHandler) GenerateMyInsights(c *fiber.Ctx) error {
+	claims := c.Locals("user").(*pkgjwt.Claims)
+
+	resp, err := h.aiService.GenerateMyInsights(c.UserContext(), claims.UserID)
 	if err != nil {
 		return err
 	}

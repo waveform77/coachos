@@ -114,6 +114,9 @@ func RegisterRoutes(
 	// Me (player self-service)
 	me := v1.Group("/me", auth)
 	me.Get("/matches", matchH.GetMyMatches)
+	me.Get("/reports", analyticsH.GetMyReports)
+	me.Get("/ai/insights", aiH.GetMyInsights)
+	me.Post("/ai/insights", aiH.GenerateMyInsights)
 
 	// Matches
 	matches := v1.Group("/matches", auth)

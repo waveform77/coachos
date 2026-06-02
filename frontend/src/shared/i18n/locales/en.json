@@ -545,6 +545,7 @@
     "teamwork": "Teamwork",
     "score": "Score",
     "maxScore": "of 10",
+    "avgScore": "Average Score",
     "assessedBy": "Assessed By",
     "assessedAt": "Assessed At",
     "notes": "Coach Notes",
@@ -811,6 +812,7 @@
     "myGoals": "My Goals",
     "myProgress": "My Progress",
     "myReports": "My Reports",
+    "form": "Form",
     "schedule": "Schedule",
     "scheduleEmpty": "No sessions",
     "scheduleEmptyHint": "Your team sessions will appear here",
@@ -881,6 +883,13 @@
       "U21": "U21",
       "Senior": "Senior"
     }
+  },
+  "reports": {
+    "recLowAttendance": "Low attendance. Try not to miss training sessions — consistency is the key to progress.",
+    "recWeakSkills": "Focus on: {{skills}}. Working on these skills will give you quick growth.",
+    "recNoGoals": "No goals scored in recent matches. Try to work more on finishing attacks during training.",
+    "recGoodForm": "Great form! Maintain your current training and recovery pace.",
+    "recGeneral": "Keep working on yourself. Regular training and self-analysis will help you reach new heights."
   },
   "coachNotes": {
     "title": "Coach Notes",

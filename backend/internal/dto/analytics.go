@@ -126,3 +126,20 @@ type PlayerFormResponse struct {
 	Attendance  float64 `json:"attendance"` // attendance rate %
 	MatchCount  int     `json:"matchCount"` // matches in last 14 days
 }
+
+// PlayerMatchStats holds aggregated match statistics for a player.
+type PlayerMatchStats struct {
+	Goals         int `json:"goals"`
+	Assists       int `json:"assists"`
+	YellowCards   int `json:"yellowCards"`
+	RedCards      int `json:"redCards"`
+	MinutesPlayed int `json:"minutesPlayed"`
+	MatchesPlayed int `json:"matchesPlayed"`
+}
+
+// MyReportsResponse aggregates all data shown on the player's reports page.
+type MyReportsResponse struct {
+	Analytics  *PlayerAnalyticsResponse `json:"analytics"`
+	MatchStats *PlayerMatchStats        `json:"matchStats"`
+	Form       *PlayerFormResponse      `json:"form"`
+}

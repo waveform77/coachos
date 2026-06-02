@@ -57,6 +57,10 @@ export const API_ENDPOINTS = {
     SUMMARY: (id: string) => `/matches/${id}/summary`,
     MY_MATCHES: '/me/matches',
   },
+  ME: {
+    REPORTS: '/me/reports',
+    AI_INSIGHTS: '/me/ai/insights',
+  },
   ANALYTICS: {
     COACH_DASHBOARD: '/analytics/coach-dashboard',
     TEAM: (id: string) => `/analytics/team/${id}`,

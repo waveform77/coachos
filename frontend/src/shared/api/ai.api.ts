@@ -78,4 +78,10 @@ export const aiApi = {
 
   summarizeProgress: (data: SummarizeProgressRequest) =>
     apiClient.post<AIResponse>(API_ENDPOINTS.AI.SUMMARIZE_PROGRESS, data).then((r) => r.data),
+
+  getMyInsights: () =>
+    apiClient.get<AIResponse>(API_ENDPOINTS.ME.AI_INSIGHTS).then((r) => r.data),
+
+  generateMyInsights: () =>
+    apiClient.post<AIResponse>(API_ENDPOINTS.ME.AI_INSIGHTS).then((r) => r.data),
 }
