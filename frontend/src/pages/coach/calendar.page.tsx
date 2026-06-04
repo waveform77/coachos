@@ -165,7 +165,18 @@ export function CalendarPage() {
                 <SessionForm
                   teams={teamsList}
                   loading={isCreating}
-                  onSubmit={async (v) => createSession(v as Parameters<typeof sessionsApi.createSession>[0])}
+                  onSubmit={async (v) => {
+                    const payload = {
+                      teamID: v.teamID,
+                      scheduledAt: v.scheduledAt ? new Date(v.scheduledAt).toISOString() : undefined,
+                      durationMin: v.durationMin === '' ? undefined : v.durationMin,
+                      location: v.location,
+                      intensity: v.intensity,
+                      notes: v.notes,
+                      focus: v.focus,
+                    }
+                    createSession(payload)
+                  }}
                 />
               </DialogContent>
             </Dialog>
@@ -379,7 +390,14 @@ export function CalendarPage() {
               onSubmit={async (v) => {
                 await updateSession({
                   id: selectedEvent!.id,
-                  data: v as Parameters<typeof sessionsApi.updateSession>[1],
+                  data: {
+                    scheduledAt: v.scheduledAt ? new Date(v.scheduledAt).toISOString() : undefined,
+                    durationMin: v.durationMin === '' ? undefined : v.durationMin,
+                    location: v.location,
+                    intensity: v.intensity,
+                    notes: v.notes,
+                    focus: v.focus,
+                  } as Parameters<typeof sessionsApi.updateSession>[1],
                 })
               }}
             />
