@@ -156,10 +156,6 @@ export function CalendarPage() {
                 {teamsList.map((t) => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)}
               </SelectContent>
             </Select>
-            <Button variant="outline" className="gap-2" onClick={() => navigate('/coach/sessions/demo')}>
-              <Dumbbell className="h-4 w-4" />
-              {t('sessions.sessionBuilder')}
-            </Button>
             <Dialog open={createOpen} onOpenChange={setCreateOpen}>
               <DialogTrigger asChild>
                 <Button className="gap-2"><Plus className="h-4 w-4" />{t('calendar.addSession')}</Button>
