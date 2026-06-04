@@ -90,6 +90,14 @@ func (h *ClubHandler) UpdateClub(c *fiber.Ctx) error {
 }
 
 // GetClubDashboard handles GET /api/v1/clubs/:id/dashboard.
+// @Summary Get club dashboard
+// @Description Returns club statistics and overview
+// @Tags clubs
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "Club ID"
+// @Success 200 {object} dto.ClubDashboardResponse
+// @Router /api/v1/clubs/{id}/dashboard [get]
 func (h *ClubHandler) GetClubDashboard(c *fiber.Ctx) error {
 	id := c.Params("id")
 	claims, ok := c.Locals("user").(*pkgjwt.Claims)

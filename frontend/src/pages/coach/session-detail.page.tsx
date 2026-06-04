@@ -107,7 +107,7 @@ export function SessionDetailPage() {
         <TabsContent value="builder" className="mt-4">
           <SessionBuilder
             sessionId={sessionId!}
-            initialBlocks={session.blocks ?? []}
+            initialBlocks={session.blocks}
             exercises={exercises?.data ?? []}
             readOnly={!isEditable}
             onSave={() => qc.invalidateQueries({ queryKey: queryKeys.sessions.detail(sessionId!) })}

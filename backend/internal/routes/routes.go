@@ -5,6 +5,7 @@ import (
 	"github.com/coachos/backend/internal/handler"
 	"github.com/coachos/backend/internal/middleware"
 	"github.com/gofiber/fiber/v2"
+	swagger "github.com/gofiber/swagger"
 	"gorm.io/gorm"
 )
 
@@ -31,6 +32,9 @@ func RegisterRoutes(
 ) {
 	// Health check
 	app.Get("/health", healthH.Health)
+
+	// Swagger UI
+	app.Get("/swagger/*", swagger.HandlerDefault)
 
 	auth := middleware.Auth(jwtSecret)
 	adminOnly := middleware.RequireRole(domain.RoleAdmin)
@@ -104,6 +108,7 @@ func RegisterRoutes(
 	sessions.Patch("/:id", coachOnly, sessionH.UpdateSession)
 	sessions.Delete("/:id", coachOnly, sessionH.DeleteSession)
 	sessions.Post("/:id/blocks", coachOnly, sessionH.AddBlock)
+	sessions.Put("/:id/blocks", coachOnly, sessionH.SaveBlocks)
 	sessions.Post("/:id/blocks/:blockID/exercises", coachOnly, sessionH.AddExerciseToBlock)
 	sessions.Patch("/:id/attendance", coachOnly, sessionH.MarkAttendance)
 	sessions.Post("/:id/complete", coachOnly, sessionH.CompleteSession)

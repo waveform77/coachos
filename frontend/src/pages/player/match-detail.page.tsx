@@ -10,6 +10,7 @@ import {
 } from '@/shared/ui'
 import { EmptyState } from '@/shared/ui'
 import { formatDate, getStatusColor, getInitials, capitalize } from '@/shared/lib/utils'
+import { TacticalBoardView } from '@/features/matches/tactical-board-view'
 
 export function PlayerMatchDetailPage() {
   const { t } = useTranslation()
@@ -86,6 +87,9 @@ export function PlayerMatchDetailPage() {
 
         <TabsContent value="lineup" className="mt-4">
           <div className="space-y-4">
+            {starters.some((s) => s.fieldX != null && s.fieldY != null) && (
+              <TacticalBoardView lineup={lineup ?? []} />
+            )}
             <div>
               <h3 className="mb-2 font-semibold text-sm">{t('tactics.onField') || 'Стартовый состав'} ({starters.length})</h3>
               {starters.length ? (
@@ -145,14 +149,15 @@ export function PlayerMatchDetailPage() {
 }
 
 function PlayerLineupRow({ entry }: { entry: import('@/shared/types').MatchLineup }) {
-  const player = entry.player
+  const firstName = entry.firstName || entry.player?.firstName || ''
+  const lastName = entry.lastName || entry.player?.lastName || ''
   return (
     <div className="flex items-center gap-3 rounded-lg border p-3">
       <Avatar className="h-9 w-9">
-        <AvatarFallback className="text-xs">{getInitials(player?.firstName ?? '', player?.lastName ?? '')}</AvatarFallback>
+        <AvatarFallback className="text-xs">{getInitials(firstName, lastName)}</AvatarFallback>
       </Avatar>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium truncate">{player?.firstName} {player?.lastName}</p>
+        <p className="text-sm font-medium truncate">{firstName} {lastName}</p>
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           {entry.position && <span className="capitalize">{capitalize(entry.position)}</span>}
           {entry.fieldX != null && entry.fieldY != null && (

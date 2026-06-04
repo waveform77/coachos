@@ -22,7 +22,7 @@ export const matchesApi = {
     apiClient.get<Match>(API_ENDPOINTS.MATCHES.DETAIL(matchId)).then((r) => r.data.lineup ?? []),
 
   setLineup: (matchId: string, lineup: Partial<MatchLineup>[]) =>
-    apiClient.post<MatchLineup[]>(API_ENDPOINTS.MATCHES.LINEUP(matchId), { players: lineup }).then((r) => r.data),
+    apiClient.put(API_ENDPOINTS.MATCHES.LINEUP(matchId), { players: lineup }).then((r) => r.data),
 
   getMatchEvents: (matchId: string) =>
     apiClient.get<Match>(API_ENDPOINTS.MATCHES.DETAIL(matchId)).then((r) => r.data.events ?? []),

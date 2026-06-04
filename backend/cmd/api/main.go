@@ -8,6 +8,7 @@ import (
 	"syscall"
 	"time"
 
+	_ "github.com/coachos/backend/docs"
 	"github.com/coachos/backend/internal/ai"
 	"github.com/coachos/backend/internal/config"
 	"github.com/coachos/backend/internal/database"
@@ -23,6 +24,15 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/limiter"
 )
 
+// @title CoachOS API
+// @version 1.0.0
+// @description API documentation for Football Manager system
+// @host localhost:8080
+// @BasePath /
+// @schemes http
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 func main() {
 	// 1. Load config
 	cfg, err := config.Load()

@@ -254,6 +254,33 @@ func (h *SessionHandler) CompleteSession(c *fiber.Ctx) error {
 	return c.JSON(mapSessionResp(*session))
 }
 
+// SaveBlocks handles PUT /api/v1/sessions/:id/blocks.
+// @Summary      Save session blocks
+// @Description  Atomically replaces all blocks and exercises for a session.
+// @Tags         sessions
+// @Accept       json
+// @Produce      json
+// @Param        id    path   string              true  "Session ID"
+// @Param        body  body   dto.SaveBlocksRequest  true  "Blocks payload"
+// @Success      200   {object}  dto.MessageResponse
+// @Failure      400   {object}  map[string]string
+// @Failure      404   {object}  map[string]string
+// @Router       /api/v1/sessions/{id}/blocks [put]
+func (h *SessionHandler) SaveBlocks(c *fiber.Ctx) error {
+	id := c.Params("id")
+	var req dto.SaveBlocksRequest
+	if err := c.BodyParser(&req); err != nil {
+		return domain.NewBadRequest("invalid request body")
+	}
+	if err := validator.Validate(req); err != nil {
+		return err
+	}
+	if err := h.sessionService.SaveBlocks(c.UserContext(), id, req); err != nil {
+		return err
+	}
+	return c.JSON(dto.MessageResponse{Message: "blocks saved"})
+}
+
 func mapSessionResp(s domain.TrainingSession) dto.SessionResponse {
 	return dto.SessionResponse{
 		ID:          s.ID,

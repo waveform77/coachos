@@ -109,3 +109,27 @@ type AttendanceResponse struct {
 	Reason    string    `json:"reason,omitempty"`
 	MarkedAt  time.Time `json:"markedAt"`
 }
+
+// SaveBlockExerciseItem holds a single exercise inside a block for batch save.
+type SaveBlockExerciseItem struct {
+	ExerciseID        string `json:"exerciseId" validate:"required"`
+	OrderIndex        int    `json:"orderIndex"`
+	DurationMin       int    `json:"durationMin"`
+	Sets              int    `json:"sets"`
+	Reps              int    `json:"reps"`
+	IntensityOverride string `json:"intensityOverride"`
+}
+
+// SaveBlockItem holds a single block for batch save.
+type SaveBlockItem struct {
+	Kind        string                  `json:"kind" validate:"required,oneof=warmup main game cooldown"`
+	OrderIndex  int                     `json:"orderIndex"`
+	DurationMin int                     `json:"durationMin"`
+	Notes       string                  `json:"notes"`
+	Exercises   []SaveBlockExerciseItem `json:"exercises"`
+}
+
+// SaveBlocksRequest holds the full block structure to replace existing blocks.
+type SaveBlocksRequest struct {
+	Blocks []SaveBlockItem `json:"blocks" validate:"required,dive"`
+}

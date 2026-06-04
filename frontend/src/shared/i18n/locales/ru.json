@@ -90,7 +90,9 @@
     "devIndexLow": "Ниже среднего",
     "devIndexMedium": "Средний уровень",
     "devIndexHigh": "Хороший уровень",
-    "exportCSV": "Выгрузить CSV"
+    "exportCSV": "Выгрузить CSV",
+    "changeStatus": "Изменить статус",
+    "saving": "Сохранение..."
   },
   "nav": {
     "coach": {
@@ -470,7 +472,10 @@
     "sessionCompleted": "Завершена",
     "sessionCancelled": "Отменена",
     "matchScheduled": "Запланирован",
-    "matchCompleted": "Завершён"
+    "matchCompleted": "Завершён",
+    "noEvents": "Нет запланированных событий",
+    "session": "Тренировка",
+    "match": "Матч"
   },
   "sessions": {
     "title": "Тренировки",
@@ -505,7 +510,10 @@
     "focusPlaceholder": "Например, прессинг, владение мячом...",
     "locationPlaceholder": "Место проведения тренировки...",
     "notesPlaceholder": "Заметки к тренировке...",
-    "duration": "Длительность"
+    "duration": "Длительность",
+    "noExercisesFound": "Упражнения не найдены",
+    "sessionSaved": "Тренировка сохранена",
+    "sessionSaveFailed": "Не удалось сохранить тренировку"
   },
   "attendance": {
     "title": "Посещаемость",
@@ -654,7 +662,8 @@
     "barChart": "Столбчатая",
     "radarChart": "Радар",
     "areaChart": "Область",
-    "loadDescription": "Суммарная интенсивность тренировок команды по неделям. Помогает отслеживать перетренированность и планировать восстановление."
+    "loadDescription": "Суммарная интенсивность тренировок команды по неделям. Помогает отслеживать перетренированность и планировать восстановление.",
+    "dynamics": "Динамика"
   },
   "aiAssistant": {
     "title": "ИИ-ассистент",

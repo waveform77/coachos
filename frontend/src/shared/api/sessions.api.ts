@@ -21,6 +21,9 @@ export const sessionsApi = {
   addBlock: (sessionId: string, data: Partial<TrainingBlock>) =>
     apiClient.post<TrainingBlock>(API_ENDPOINTS.SESSIONS.BLOCKS(sessionId), data).then((r) => r.data),
 
+  saveBlocks: (sessionId: string, data: { blocks: Array<{ kind: string; orderIndex: number; durationMin?: number; notes?: string; exercises: Array<{ exerciseID: string; orderIndex: number; durationMin?: number; sets?: number; reps?: number; intensityOverride?: string }> }> }) =>
+    apiClient.put(API_ENDPOINTS.SESSIONS.BLOCKS(sessionId), data).then((r) => r.data),
+
   addExerciseToBlock: (sessionId: string, blockId: string, data: { exerciseID: string; durationMin?: number; sets?: number; reps?: number }) =>
     apiClient.post(API_ENDPOINTS.SESSIONS.BLOCK_EXERCISES(sessionId, blockId), data).then((r) => r.data),
 

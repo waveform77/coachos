@@ -6,17 +6,13 @@ import {
   DragOverlay,
   useDraggable,
   useDroppable,
-  PointerSensor,
   MouseSensor,
   TouchSensor,
   useSensor,
   useSensors,
-  rectIntersection,
-  pointerWithin,
   closestCenter,
   type DragEndEvent,
   type DragStartEvent,
-  type ClientRect,
 } from '@dnd-kit/core'
 import type { Player, Position, MatchLineup, LineupRole } from '@/shared/types'
 import { Button, Badge, Avatar, AvatarFallback, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui'
@@ -84,16 +80,6 @@ export function TacticalBoard({ players, lineup, onChange }: TacticalBoardProps)
         delay: 200,
         tolerance: 5,
       },
-    }),
-    useSensor(MouseSensor, {
-      activationConstraint: {
-        distance: 5,
-      },
-    }),
-    useSensor(TouchSensor, {
-      activationConstraint: {
-        distance: 5,
-      },
     })
   )
 
@@ -130,6 +116,7 @@ export function TacticalBoard({ players, lineup, onChange }: TacticalBoardProps)
   }
 
   const removeFromLineup = (playerId: string) => {
+    if (!playerId || playerId === 'undefined') return
     const targetId = String(playerId)
     setLineup((prev) => prev.filter((l) => {
       const lid = String(l.player?.id || l.playerID || (l as any).ID || (l.player as any)?.ID || (l.player as any)?.playerId || (l.player as any)?.playerID)
@@ -138,6 +125,7 @@ export function TacticalBoard({ players, lineup, onChange }: TacticalBoardProps)
   }
 
   const updateEntry = (playerId: string, updates: Partial<TacticalLineupEntry>) => {
+    if (!playerId || playerId === 'undefined') return
     const targetId = String(playerId)
     setLineup((prev) => prev.map((l) => {
       const lid = String(l.player?.id || l.playerID || (l as any).ID || (l.player as any).playerId || (l.player as any).playerID)
@@ -151,23 +139,35 @@ export function TacticalBoard({ players, lineup, onChange }: TacticalBoardProps)
     setLineup((prev) => {
       const starters = prev.filter((l) => l.role === 'starter')
       const subs = prev.filter((l) => l.role === 'substitute')
-      const updated = [...subs]
-      template.slots.forEach((slot, idx) => {
-        const existing = starters[idx]
-        if (existing) {
+      const assignedIds = new Set<string>()
+      const updated: TacticalLineupEntry[] = []
+
+      // Match by position first, then fallback to any remaining starter
+      template.slots.forEach((slot) => {
+        const match = starters.find((s) => {
+          if (assignedIds.has(s.playerID)) return false
+          const pos = s.position || s.player?.position
+          return pos === slot.position || pos === 'universal'
+        })
+        if (match) {
+          assignedIds.add(match.playerID)
           updated.push({
-            ...existing,
+            ...match,
             position: slot.position,
             fieldX: slot.x,
             fieldY: slot.y,
           })
         }
       })
-      const mappedIds = new Set(template.slots.map((_, i) => starters[i]?.playerID).filter(Boolean))
+
+      // Remaining starters lose coordinates (off-field)
       starters.forEach((s) => {
-        if (!mappedIds.has(s.playerID)) updated.push(s)
+        if (!assignedIds.has(s.playerID)) {
+          updated.push({ ...s, fieldX: undefined, fieldY: undefined })
+        }
       })
-      return updated
+
+      return [...updated, ...subs]
     })
   }
 
@@ -262,10 +262,7 @@ export function TacticalBoard({ players, lineup, onChange }: TacticalBoardProps)
       onDragEnd={handleDragEnd}
       measuring={{
         droppable: {
-          strategy: 0, // MeasuringStrategy.Always
-        },
-        draggable: {
-          strategy: 0, // MeasuringStrategy.Always
+          strategy: 'always' as any,
         },
       }}
     >

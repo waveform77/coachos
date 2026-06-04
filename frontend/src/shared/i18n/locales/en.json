@@ -90,7 +90,9 @@
     "devIndexLow": "Below average",
     "devIndexMedium": "Average level",
     "devIndexHigh": "Good level",
-    "exportCSV": "Export CSV"
+    "exportCSV": "Export CSV",
+    "changeStatus": "Change status",
+    "saving": "Saving..."
   },
   "nav": {
     "coach": {
@@ -470,7 +472,10 @@
     "sessionCompleted": "Completed",
     "sessionCancelled": "Cancelled",
     "matchScheduled": "Scheduled",
-    "matchCompleted": "Completed"
+    "matchCompleted": "Completed",
+    "noEvents": "No planned events",
+    "session": "Session",
+    "match": "Match"
   },
   "sessions": {
     "title": "Sessions",
@@ -505,7 +510,10 @@
     "focusPlaceholder": "e.g. pressing, ball possession...",
     "locationPlaceholder": "Training location...",
     "notesPlaceholder": "Session notes...",
-    "duration": "Duration"
+    "duration": "Duration",
+    "noExercisesFound": "No exercises found",
+    "sessionSaved": "Session saved",
+    "sessionSaveFailed": "Failed to save session"
   },
   "attendance": {
     "title": "Attendance",
@@ -654,7 +662,8 @@
     "barChart": "Bar Chart",
     "radarChart": "Radar Chart",
     "areaChart": "Area Chart",
-    "loadDescription": "Total training intensity per week. Helps track overtraining and plan recovery."
+    "loadDescription": "Total training intensity per week. Helps track overtraining and plan recovery.",
+    "dynamics": "Dynamics"
   },
   "aiAssistant": {
     "title": "AI Assistant",

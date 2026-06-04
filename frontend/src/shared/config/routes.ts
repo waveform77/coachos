@@ -6,4 +6,12 @@ export const ROUTES = {
   MATCH_DETAIL: '/matches/:id',
   TEAM: '/team',
   PROFILE: '/profile',
+  DASHBOARD: '/dashboard',
+  ADMIN_CLUB: '/admin/club',
+  COACH_COMMAND_CENTER: '/coach',
+  COACH_ANALYTICS: '/coach/analytics',
+  PLAYER_SCHEDULE: '/me/schedule',
+  PARENT_OVERVIEW: '/parent/overview',
+  SETTINGS: '/settings',
+  NOTIFICATIONS: '/notifications',
 } as const;

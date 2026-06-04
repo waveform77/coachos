@@ -22,6 +22,15 @@ func NewAuthHandler(authService *service.AuthService) *AuthHandler {
 }
 
 // Register handles POST /api/v1/auth/register.
+// @Summary Register new user
+// @Description Create a new user account
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param body body dto.RegisterRequest true "Registration data"
+// @Success 201 {object} dto.AuthResponse
+// @Failure 400 {object} map[string]string
+// @Router /api/v1/auth/register [post]
 func (h *AuthHandler) Register(c *fiber.Ctx) error {
 	var req dto.RegisterRequest
 	if err := c.BodyParser(&req); err != nil {
@@ -52,6 +61,15 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 }
 
 // Login handles POST /api/v1/auth/login.
+// @Summary User login
+// @Description Authenticate user and return tokens
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param body body dto.LoginRequest true "Login credentials"
+// @Success 200 {object} dto.AuthResponse
+// @Failure 400 {object} map[string]string
+// @Router /api/v1/auth/login [post]
 func (h *AuthHandler) Login(c *fiber.Ctx) error {
 	var req dto.LoginRequest
 	if err := c.BodyParser(&req); err != nil {
@@ -154,6 +172,13 @@ func (h *AuthHandler) Logout(c *fiber.Ctx) error {
 }
 
 // Me handles GET /api/v1/auth/me.
+// @Summary Get current user
+// @Description Returns profile of authenticated user
+// @Tags auth
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} dto.UserResponse
+// @Router /api/v1/auth/me [get]
 func (h *AuthHandler) Me(c *fiber.Ctx) error {
 	claims := c.Locals("user").(*pkgjwt.Claims)
 

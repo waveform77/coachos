@@ -7,7 +7,6 @@ import (
 	"github.com/coachos/backend/internal/domain"
 	"github.com/coachos/backend/internal/repository"
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
 type matchRepo struct {
@@ -92,7 +91,7 @@ func (r *matchRepo) SetLineup(ctx context.Context, matchID string, lineups []dom
 		if len(lineups) == 0 {
 			return nil
 		}
-		return tx.Clauses(clause.OnConflict{DoNothing: true}).Create(&lineups).Error
+		return tx.Create(&lineups).Error
 	})
 }
 

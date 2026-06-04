@@ -14,7 +14,7 @@ import {
 } from '@/shared/ui'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  AreaChart, Area, Legend, ReferenceLine,
+  AreaChart, Area, Legend, ReferenceLine, LineChart, Line,
 } from 'recharts'
 import { SkillRadarChart } from '@/entities/player/skill-radar-chart'
 import { getInitials } from '@/shared/lib/utils'
@@ -98,6 +98,7 @@ export function CoachAnalyticsPage() {
           <TabsTrigger value="attendance">{t('attendance.title')}</TabsTrigger>
           <TabsTrigger value="load">{t('analytics.load')}</TabsTrigger>
           <TabsTrigger value="players">{t('players.title')}</TabsTrigger>
+          <TabsTrigger value="pdi">PDI</TabsTrigger>
         </TabsList>
 
         <TabsContent value="attendance" className="mt-4 space-y-4">
@@ -258,6 +259,84 @@ export function CoachAnalyticsPage() {
                   </div>
                 ) : (
                   <p className="text-center text-muted-foreground py-8">{t('common.noData')}</p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="pdi" className="mt-4 space-y-4">
+          <div className="grid gap-6 lg:grid-cols-3">
+            <Card className="lg:col-span-1">
+              <CardHeader>
+                <CardTitle className="text-base">{t('players.title')}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {loadingPlayers ? (
+                  <div className="space-y-2">
+                    {[1, 2, 3, 4, 5].map((i) => <Skeleton key={i} className="h-12 w-full" />)}
+                  </div>
+                ) : playerList.length > 0 ? (
+                  <div className="space-y-2">
+                    {playerList.map((player) => (
+                      <button
+                        key={player.id}
+                        onClick={() => setSelectedPlayerId(player.id)}
+                        className={cn(
+                          'w-full flex items-center gap-3 rounded-lg border px-3 py-2 text-left transition-colors',
+                          selectedPlayerId === player.id ? 'bg-primary/5 border-primary' : 'hover:bg-muted/50'
+                        )}
+                      >
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback className="text-xs bg-primary/10 text-primary">
+                            {getInitials(player.firstName, player.lastName)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{player.firstName} {player.lastName}</p>
+                          <p className={cn('text-xs font-semibold', getDevIndexColor(player.devIndex))}>PDI: {player.devIndex}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-center text-muted-foreground py-8">{t('common.noData')}</p>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="lg:col-span-2">
+              <CardHeader>
+                <CardTitle className="text-base">{t('players.devIndex')} — {t('analytics.dynamics')}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {!selectedPlayerId ? (
+                  <div className="flex flex-col items-center justify-center py-16 text-muted-foreground gap-2">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" /></svg>
+                    </div>
+                    <p className="text-sm">{t('analytics.selectPlayers')}</p>
+                  </div>
+                ) : loadingPlayerAnalytics ? (
+                  <Skeleton className="h-80 w-full" />
+                ) : playerAnalytics?.devIndexHistory?.length ? (
+                  <ResponsiveContainer width="100%" height={360}>
+                    <LineChart data={playerAnalytics.devIndexHistory} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis dataKey="date" tickFormatter={(d) => new Date(d).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })} tick={{ fontSize: 11 }} />
+                      <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} />
+                      <Tooltip
+                        formatter={(value: number) => [`${value}`, 'PDI']}
+                        labelFormatter={(label) => new Date(label).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}
+                      />
+                      <Legend />
+                      <ReferenceLine y={70} stroke="#10b981" strokeDasharray="4 4" label={{ value: t('players.devIndex') + ' 70', fontSize: 11, fill: '#10b981' }} />
+                      <ReferenceLine y={40} stroke="#f59e0b" strokeDasharray="4 4" label={{ value: t('players.devIndex') + ' 40', fontSize: 11, fill: '#f59e0b' }} />
+                      <Line type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} name="PDI" />
+                    </LineChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <p className="text-center text-muted-foreground py-16">{t('common.noData')}</p>
                 )}
               </CardContent>
             </Card>

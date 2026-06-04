@@ -174,6 +174,37 @@ func (s *SessionService) AddExerciseToBlock(ctx context.Context, blockID string,
 	return se, nil
 }
 
+// SaveBlocks replaces all blocks and exercises for a session atomically.
+func (s *SessionService) SaveBlocks(ctx context.Context, sessionID string, req dto.SaveBlocksRequest) error {
+	if _, err := s.sessionRepo.FindByID(ctx, sessionID); err != nil {
+		return err
+	}
+
+	blocks := make([]domain.TrainingBlock, len(req.Blocks))
+	for i, b := range req.Blocks {
+		blocks[i] = domain.TrainingBlock{
+			SessionID:   sessionID,
+			Kind:        domain.BlockKind(b.Kind),
+			OrderIndex:  b.OrderIndex,
+			DurationMin: b.DurationMin,
+			Notes:       b.Notes,
+			Exercises:   make([]domain.SessionExercise, len(b.Exercises)),
+		}
+		for j, e := range b.Exercises {
+			blocks[i].Exercises[j] = domain.SessionExercise{
+				ExerciseID:        e.ExerciseID,
+				OrderIndex:        e.OrderIndex,
+				DurationMin:       e.DurationMin,
+				Sets:              e.Sets,
+				Reps:              e.Reps,
+				IntensityOverride: e.IntensityOverride,
+			}
+		}
+	}
+
+	return s.sessionRepo.SaveBlocks(ctx, sessionID, blocks)
+}
+
 // MarkAttendance records attendance for a session.
 func (s *SessionService) MarkAttendance(ctx context.Context, sessionID, markedByID string, req dto.MarkAttendanceRequest) error {
 	for _, entry := range req.Records {

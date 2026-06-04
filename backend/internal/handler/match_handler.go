@@ -86,6 +86,14 @@ func (h *MatchHandler) GetMatch(c *fiber.Ctx) error {
 }
 
 // ListMatches handles GET /api/v1/matches.
+// @Summary List matches
+// @Description Returns paginated list of matches
+// @Tags matches
+// @Produce json
+// @Security BearerAuth
+// @Param status query string false "Match status filter"
+// @Success 200 {array} dto.MatchResponse
+// @Router /api/v1/matches [get]
 func (h *MatchHandler) ListMatches(c *fiber.Ctx) error {
 	claims := c.Locals("user").(*pkgjwt.Claims)
 	teamID := c.Query("teamId")

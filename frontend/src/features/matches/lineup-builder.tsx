@@ -42,25 +42,29 @@ export function LineupBuilder({ matchId, players, initialLineup = [], onSaved }:
   }, []);
 
   const safeInitialLineup = (initialLineup ?? []) as MatchLineup[]
-  const [lineup, setLineup] = React.useState<TacticalLineupEntry[]>(() => 
+  const [lineup, _setLineup] = React.useState<TacticalLineupEntry[]>(() => 
     getNormalizedLineup(safeInitialLineup, players)
   )
+  const setLineup = React.useCallback((updater: React.SetStateAction<TacticalLineupEntry[]>) => {
+    isDirtyRef.current = true
+    _setLineup(updater)
+  }, [_setLineup])
   
   const [saving, setSaving] = React.useState(false)
+  const isDirtyRef = React.useRef(false)
 
-  // Обновляем состояние только если оно пустое и пришли новые данные
-  // Или если initialLineup изменился по количеству элементов (внешнее обновление)
+  // Sync from props only on initial load or when not dirty
   const lastInitialRef = React.useRef(JSON.stringify(initialLineup.map(l => l.playerID || (l as any).playerId)));
   
   React.useEffect(() => {
     const raw = (initialLineup ?? []) as MatchLineup[]
     const currentInitialStr = JSON.stringify(raw.map(l => l.playerID || (l as any).playerId));
-    if (players.length > 0 && (lineup.length === 0 || currentInitialStr !== lastInitialRef.current)) {
+    if (players.length > 0 && !isDirtyRef.current && (lineup.length === 0 || currentInitialStr !== lastInitialRef.current)) {
       console.log('SYNCING LINEUP FROM PROPS', raw.length);
-      setLineup(getNormalizedLineup(raw, players));
+      _setLineup(getNormalizedLineup(raw, players));
       lastInitialRef.current = currentInitialStr;
     }
-  }, [initialLineup, players, getNormalizedLineup]);
+  }, [initialLineup, players, getNormalizedLineup, lineup.length]);
 
   const handleSave = async () => {
     console.log('SAVING LINEUP:', lineup.length);
@@ -71,10 +75,11 @@ export function LineupBuilder({ matchId, players, initialLineup = [], onSaved }:
         playerId: l.player.id || l.playerID || (l.player as any).ID || (l.player as any).playerId || (l.player as any).playerID,
         role: l.role,
         position: l.position,
-        fieldX: l.fieldX,
-        fieldY: l.fieldY,
+        fieldX: l.fieldX ?? null,
+        fieldY: l.fieldY ?? null,
       })) as any)
       toast.success(t('tactics.lineupSaved') || 'Состав сохранён')
+      isDirtyRef.current = false
       onSaved?.()
     } catch {
       toast.error(t('tactics.lineupSaveError') || 'Ошибка сохранения')
@@ -135,10 +140,12 @@ function ListView({
 
   const addPlayer = (player: Player, role: LineupRole) => {
     const pid = String(player.id || (player as any).ID || (player as any).playerId || (player as any).playerID);
+    if (!pid || pid === 'undefined') return
     onChange([...lineup, { playerID: pid, player, role, position: player.position || 'universal' }])
   }
 
   const removePlayer = (playerId: string) => {
+    if (!playerId || playerId === 'undefined') return
     const targetId = String(playerId);
     onChange(lineup.filter((l) => {
       const lid = String(l.playerID || l.player?.id || (l as any).playerId || (l as any).ID);
@@ -147,6 +154,7 @@ function ListView({
   }
 
   const updateEntry = (playerId: string, updates: Partial<TacticalLineupEntry>) => {
+    if (!playerId || playerId === 'undefined') return
     const targetId = String(playerId);
     onChange(lineup.map((l) => {
       const lid = String(l.playerID || l.player?.id || (l as any).playerId || (l as any).ID);

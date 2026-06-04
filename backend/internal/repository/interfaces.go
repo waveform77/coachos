@@ -113,6 +113,7 @@ type TrainingSessionRepository interface {
 	GetBlocks(ctx context.Context, sessionID string) ([]domain.TrainingBlock, error)
 	AddExerciseToBlock(ctx context.Context, se *domain.SessionExercise) error
 	GetSessionDetail(ctx context.Context, id string) (*domain.TrainingSession, error)
+	SaveBlocks(ctx context.Context, sessionID string, blocks []domain.TrainingBlock) error
 }
 
 // PlayerAttendanceStat holds per-player attendance statistics.

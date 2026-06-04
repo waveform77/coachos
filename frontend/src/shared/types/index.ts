@@ -44,7 +44,7 @@ export interface AttendanceRecord { id: string; sessionID: string; playerID: str
 export interface PlayerAssessment { id: string; playerID: string; coachID: string; assessedAt: string; technical: number; physical: number; tactical: number; discipline: number; teamwork: number; notes?: string; }
 export interface PlayerGoal { id: string; playerID: string; title: string; description?: string; targetMetric?: string; targetValue?: number; deadline?: string; status: GoalStatus; progressPct: number; }
 export interface Match { id: string; teamID: string; opponent: string; kickoffAt: string; location?: string; isHome: boolean; status: MatchStatus; goalsFor: number; goalsAgainst: number; notes?: string; lineup?: MatchLineup[]; events?: MatchEvent[]; }
-export interface MatchLineup { matchID: string; playerID: string; playerId?: string; player?: Player; role: LineupRole; position?: Position; minutesPlayed?: number; fieldX?: number; fieldY?: number; }
+export interface MatchLineup { matchID: string; playerID: string; playerId?: string; player?: Player; firstName?: string; lastName?: string; role: LineupRole; position?: Position; minutesPlayed?: number; fieldX?: number; fieldY?: number; }
 export interface MatchEvent { id: string; matchID: string; playerID?: string; player?: Player; minute: number; type: MatchEventType; notes?: string; }
 export interface Notification { id: string; userID: string; type: NotificationType; title: string; body?: string; payload?: Record<string, unknown>; readAt?: string; createdAt: string; }
 

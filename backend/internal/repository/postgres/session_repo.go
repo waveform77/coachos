@@ -122,3 +122,51 @@ func (r *sessionRepo) GetSessionDetail(ctx context.Context, id string) (*domain.
 	}
 	return &session, err
 }
+
+// SaveBlocks replaces all blocks (and their exercises) for a session atomically.
+func (r *sessionRepo) SaveBlocks(ctx context.Context, sessionID string, blocks []domain.TrainingBlock) error {
+	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		// 1. Find all block IDs for this session
+		var blockIDs []string
+		if err := tx.Model(&domain.TrainingBlock{}).
+			Where("session_id = ?", sessionID).
+			Pluck("id", &blockIDs).Error; err != nil {
+			return err
+		}
+
+		// 2. Hard-delete all exercises for these blocks
+		if len(blockIDs) > 0 {
+			if err := tx.Unscoped().
+				Where("block_id IN ?", blockIDs).
+				Delete(&domain.SessionExercise{}).Error; err != nil {
+				return err
+			}
+		}
+
+		// 3. Hard-delete all blocks for this session
+		if err := tx.Unscoped().
+			Where("session_id = ?", sessionID).
+			Delete(&domain.TrainingBlock{}).Error; err != nil {
+			return err
+		}
+
+		// 4. Create new blocks and their exercises explicitly
+		for i := range blocks {
+			b := &blocks[i]
+			b.SessionID = sessionID
+			// Create block first
+			if err := tx.Omit("Exercises").Create(b).Error; err != nil {
+				return err
+			}
+			// Create exercises
+			for j := range b.Exercises {
+				b.Exercises[j].BlockID = b.ID
+				if err := tx.Omit("Exercise").Create(&b.Exercises[j]).Error; err != nil {
+					return err
+				}
+			}
+		}
+
+		return nil
+	})
+}
