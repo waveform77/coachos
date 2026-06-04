@@ -101,7 +101,7 @@
       "players": "Игроки",
       "parentRequests": "Запросы родителей",
       "calendar": "Календарь",
-      "sessionBuilder": "Конструктор тренировок",
+      "sessions": "Тренировки",
       "exercises": "Упражнения",
       "attendance": "Посещаемость",
       "assessments": "Оценки",
@@ -513,6 +513,7 @@
     "notesPlaceholder": "Заметки к тренировке...",
     "duration": "Длительность",
     "noExercisesFound": "Упражнения не найдены",
+    "noSessions": "Нет тренировок",
     "sessionSaved": "Тренировка сохранена",
     "sessionSaveFailed": "Не удалось сохранить тренировку"
   },

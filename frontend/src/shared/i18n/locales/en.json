@@ -101,7 +101,7 @@
       "players": "Players",
       "parentRequests": "Parent Requests",
       "calendar": "Calendar",
-      "sessionBuilder": "Session Builder",
+      "sessions": "Sessions",
       "exercises": "Exercises",
       "attendance": "Attendance",
       "assessments": "Assessments",
@@ -513,6 +513,7 @@
     "notesPlaceholder": "Session notes...",
     "duration": "Duration",
     "noExercisesFound": "No exercises found",
+    "noSessions": "No sessions",
     "sessionSaved": "Session saved",
     "sessionSaveFailed": "Failed to save session"
   },

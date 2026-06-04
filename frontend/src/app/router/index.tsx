@@ -21,6 +21,7 @@ const PlayersPage = React.lazy(() => import('@/pages/coach/players.page').then((
 const PlayerDetailPage = React.lazy(() => import('@/pages/coach/player-detail.page').then((m) => ({ default: m.PlayerDetailPage })))
 const CalendarPage = React.lazy(() => import('@/pages/coach/calendar.page').then((m) => ({ default: m.CalendarPage })))
 const SessionDetailPage = React.lazy(() => import('@/pages/coach/session-detail.page').then((m) => ({ default: m.SessionDetailPage })))
+const SessionsListPage = React.lazy(() => import('@/pages/coach/sessions-list.page').then((m) => ({ default: m.SessionsListPage })))
 const SessionNewPage = React.lazy(() => import('@/pages/coach/session-new.page').then((m) => ({ default: m.SessionNewPage })))
 const ExercisesPage = React.lazy(() => import('@/pages/coach/exercises.page').then((m) => ({ default: m.ExercisesPage })))
 const AttendancePage = React.lazy(() => import('@/pages/coach/attendance.page').then((m) => ({ default: m.AttendancePage })))
@@ -110,6 +111,7 @@ export const router = createBrowserRouter(
       { path: '/coach/players', element: <ProtectedRoute allowedRoles={['coach', 'analyst', 'admin']}><Suspend><PlayersPage /></Suspend></ProtectedRoute> },
       { path: '/coach/players/:playerId', element: <ProtectedRoute allowedRoles={['coach', 'analyst', 'admin']}><Suspend><PlayerDetailPage /></Suspend></ProtectedRoute> },
       { path: '/coach/calendar', element: <ProtectedRoute allowedRoles={['coach', 'analyst', 'admin']}><Suspend><CalendarPage /></Suspend></ProtectedRoute> },
+      { path: '/coach/sessions', element: <ProtectedRoute allowedRoles={['coach', 'admin']}><Suspend><SessionsListPage /></Suspend></ProtectedRoute> },
       { path: '/coach/sessions/new', element: <ProtectedRoute allowedRoles={['coach', 'admin']}><Suspend><SessionNewPage /></Suspend></ProtectedRoute> },
       { path: '/coach/sessions/:sessionId', element: <ProtectedRoute allowedRoles={['coach', 'admin']}><Suspend><SessionDetailPage /></Suspend></ProtectedRoute> },
       { path: '/coach/exercises', element: <ProtectedRoute allowedRoles={['coach', 'analyst', 'admin']}><Suspend><ExercisesPage /></Suspend></ProtectedRoute> },
