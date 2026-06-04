@@ -1,12 +1,21 @@
 package handler
 
-import (
-	"encoding/json"
-	"net/http"
-)
+import "github.com/gofiber/fiber/v2"
 
-func HealthCheck(w http.ResponseWriter, r *http.Request) {
-	json.NewEncoder(w).Encode(map[string]string{
-		"status": "ok",
+// HealthHandler handles health check endpoints.
+type HealthHandler struct {
+	version string
+}
+
+// NewHealthHandler creates a new HealthHandler.
+func NewHealthHandler(version string) *HealthHandler {
+	return &HealthHandler{version: version}
+}
+
+// Health handles GET /health.
+func (h *HealthHandler) Health(c *fiber.Ctx) error {
+	return c.JSON(fiber.Map{
+		"status":  "ok",
+		"version": h.version,
 	})
 }

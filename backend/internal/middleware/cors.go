@@ -1,16 +1,31 @@
 package middleware
 
-import "net/http"
+import (
+	"strings"
 
-func CORS(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-		if r.Method == "OPTIONS" {
-			w.WriteHeader(http.StatusOK)
-			return
+	"github.com/gofiber/fiber/v2"
+)
+
+// CORSMiddleware returns a Fiber handler that sets CORS headers.
+func CORSMiddleware(origins []string) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		origin := c.Get("Origin")
+
+		for _, allowed := range origins {
+			if strings.TrimSpace(allowed) == "*" || strings.TrimSpace(allowed) == origin {
+				c.Set("Access-Control-Allow-Origin", origin)
+				break
+			}
 		}
-		next.ServeHTTP(w, r)
-	})
+
+		c.Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
+		c.Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		c.Set("Access-Control-Allow-Credentials", "true")
+
+		if c.Method() == "OPTIONS" {
+			return c.SendStatus(fiber.StatusNoContent)
+		}
+
+		return c.Next()
+	}
 }

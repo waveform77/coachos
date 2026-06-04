@@ -96,9 +96,3 @@ docker-build:
 tidy:
 	go mod tidy
 
-.PHONY: lint test-ci
-lint:
-	@golangci-lint run ./...
-
-test-ci:
-	@go test -race -coverprofile=coverage.out ./...
