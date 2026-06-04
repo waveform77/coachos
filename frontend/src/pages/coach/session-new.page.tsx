@@ -22,13 +22,23 @@ export function SessionNewPage() {
     queryFn: () => teamsApi.listTeams({ clubId: user?.clubId }),
   })
 
-  const handleSubmit = async (values: Parameters<typeof sessionsApi.createSession>[0]) => {
+  const handleSubmit = async (values: { teamID: string; scheduledAt: string; durationMin?: number | ''; location?: string; intensity: string; notes?: string; focus: string[] }) => {
     setLoading(true)
     try {
-      const session = await sessionsApi.createSession(values)
+      const payload = {
+        teamID: values.teamID,
+        scheduledAt: values.scheduledAt ? new Date(values.scheduledAt).toISOString() : undefined,
+        durationMin: values.durationMin === '' ? undefined : values.durationMin,
+        location: values.location,
+        intensity: values.intensity as 'low' | 'medium' | 'high',
+        notes: values.notes,
+        focus: values.focus,
+      }
+      const session = await sessionsApi.createSession(payload)
       toast.success(t('sessions.sessionSaved'))
       navigate(`/coach/sessions/${session.id}`)
-    } catch {
+    } catch (err: any) {
+      console.error('Create session error:', err)
       toast.error(t('sessions.sessionSaveFailed'))
     } finally {
       setLoading(false)
