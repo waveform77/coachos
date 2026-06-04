@@ -2,7 +2,7 @@ import * as React from 'react'
 import { DndContext, closestCenter, type DragEndEvent } from '@dnd-kit/core'
 import { SortableContext, useSortable, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { Plus, GripVertical, Trash2, Clock, ChevronDown, ChevronUp, ArrowUp, ArrowDown } from 'lucide-react'
+import { Plus, GripVertical, Trash2, Clock, ChevronDown, ChevronUp, ArrowUp, ArrowDown, Timer, Layers, Repeat } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import type { TrainingBlock, Exercise, BlockKind } from '@/shared/types'
@@ -43,12 +43,13 @@ const BLOCK_COLORS: Record<BlockKind, string> = {
 }
 
 function SortableExercise({
-  ex, onRemove, onUpdate, readOnly,
+  ex, onRemove, onUpdate, readOnly, t,
 }: {
   ex: LocalExercise
   onRemove: () => void
   onUpdate: (patch: Partial<LocalExercise>) => void
   readOnly?: boolean
+  t: (key: string) => string
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: ex.id })
 
@@ -71,9 +72,9 @@ function SortableExercise({
           </button>
         )}
       </div>
-      <div className="flex items-center gap-2 pl-5">
-        <div className="flex items-center gap-1">
-          <span className="text-xs text-muted-foreground">Min</span>
+      <div className="flex items-center gap-3 pl-5">
+        <div className="flex items-center gap-1.5" title={t('common.duration')}>
+          <Timer className="h-3.5 w-3.5 text-muted-foreground" />
           <Input
             type="number"
             min={1}
@@ -81,11 +82,11 @@ function SortableExercise({
             value={ex.durationMin ?? ''}
             onChange={(e) => onUpdate({ durationMin: e.target.value === '' ? undefined : Number(e.target.value) })}
             disabled={readOnly}
-            className="h-6 w-16 text-xs"
+            className="h-7 w-[52px] text-xs px-1.5"
           />
         </div>
-        <div className="flex items-center gap-1">
-          <span className="text-xs text-muted-foreground">Sets</span>
+        <div className="flex items-center gap-1.5" title={t('sessions.sets')}>
+          <Layers className="h-3.5 w-3.5 text-muted-foreground" />
           <Input
             type="number"
             min={1}
@@ -93,11 +94,11 @@ function SortableExercise({
             value={ex.sets ?? ''}
             onChange={(e) => onUpdate({ sets: e.target.value === '' ? undefined : Number(e.target.value) })}
             disabled={readOnly}
-            className="h-6 w-14 text-xs"
+            className="h-7 w-[44px] text-xs px-1.5"
           />
         </div>
-        <div className="flex items-center gap-1">
-          <span className="text-xs text-muted-foreground">Reps</span>
+        <div className="flex items-center gap-1.5" title={t('sessions.reps')}>
+          <Repeat className="h-3.5 w-3.5 text-muted-foreground" />
           <Input
             type="number"
             min={1}
@@ -105,7 +106,7 @@ function SortableExercise({
             value={ex.reps ?? ''}
             onChange={(e) => onUpdate({ reps: e.target.value === '' ? undefined : Number(e.target.value) })}
             disabled={readOnly}
-            className="h-6 w-14 text-xs"
+            className="h-7 w-[44px] text-xs px-1.5"
           />
         </div>
       </div>
@@ -176,6 +177,7 @@ function SortableBlock({
                       key={ex.id}
                       ex={ex}
                       readOnly={readOnly}
+                      t={t}
                       onRemove={() => onRemoveExercise(ex.id)}
                       onUpdate={(patch) => onUpdateExercise(ex.id, patch)}
                     />
@@ -383,7 +385,7 @@ export function SessionBuilder({ sessionId, initialBlocks, exercises, readOnly, 
           <span>·</span>
           <span><strong className="text-foreground">{blocks.reduce((acc, b) => acc + b.exercises.length, 0)}</strong> {t('sessions.exercises').toLowerCase()}</span>
         </div>
-        {!readOnly && <Button onClick={handleSave} disabled={saving} size="sm">{saving ? t('common.sending') : t('common.saveChanges')}</Button>}
+        {!readOnly && <Button onClick={handleSave} disabled={saving} size="sm">{saving ? t('common.sending') : t('common.save')}</Button>}
       </div>
 
       <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
