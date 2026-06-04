@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import {
   LayoutDashboard, Users, Calendar, Dumbbell, ClipboardCheck, BarChart3,
   Brain, Trophy, UserCheck, Target, BookOpen, Home, Building2,
-  Star, TrendingUp, FileText, KeyRound,
+  Star, TrendingUp, FileText, KeyRound, ClipboardList,
 } from 'lucide-react'
 import { useAuthStore } from '@/app/store/auth.store'
 import { Link } from 'react-router-dom'
@@ -23,6 +23,7 @@ function getNavItems(role: string, t: TFunction): NavItem[] {
         { label: t('nav.coach.myTeams'), href: '/coach/teams', icon: Users },
         { label: t('nav.coach.players'), href: '/coach/players', icon: UserCheck },
         { label: t('nav.coach.calendar'), href: '/coach/calendar', icon: Calendar },
+        { label: t('nav.coach.sessionBuilder'), href: '/coach/sessions/new', icon: ClipboardList },
         { label: t('nav.coach.exercises'), href: '/coach/exercises', icon: Dumbbell },
         { label: t('nav.coach.attendance'), href: '/coach/attendance', icon: ClipboardCheck },
         { label: t('nav.coach.assessments'), href: '/coach/assessments', icon: Star },
