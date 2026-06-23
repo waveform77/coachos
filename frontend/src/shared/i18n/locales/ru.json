@@ -111,6 +111,7 @@
     },
     "admin": {
       "dashboard": "Обзор",
+      "users": "Пользователи",
       "teams": "Команды",
       "players": "Игроки",
       "coaches": "Тренеры",
@@ -121,7 +122,8 @@
       "matches": "Матчи",
       "progress": "Прогресс",
       "goals": "Цели",
-      "reports": "Отчёты"
+      "reports": "Отчёты",
+      "linkProfile": "Привязать профиль"
     },
     "parent": {
       "overview": "Обзор",
@@ -811,6 +813,15 @@
     "noLinkedPlayers": "Пока нет связанных детей",
     "linkChild": "Связать ребёнка",
     "linkChildDesc": "Введите код от тренера для связи с ребёнком"
+  },
+  "player": {
+    "linkProfile": "Привязать профиль",
+    "linkProfileDescription": "Введите 6-значный код, полученный от тренера, чтобы связать аккаунт с карточкой игрока",
+    "linkProfileDesc": "Введите код от тренера для привязки профиля",
+    "enterCodePlaceholder": "Введите 6-значный код...",
+    "codeLinked": "Профиль привязан!",
+    "codeLinkedDesc": "Вы теперь связаны с {{name}}",
+    "invalidCode": "Неверный или истёкший код"
   },
   "playerPortal": {
     "matches": "Матчи",

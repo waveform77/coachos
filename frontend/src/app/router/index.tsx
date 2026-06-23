@@ -34,6 +34,7 @@ const AiAssistantPage = React.lazy(() => import('@/pages/coach/ai-assistant.page
 // Admin pages
 const ClubPage = React.lazy(() => import('@/pages/admin/club.page').then((m) => ({ default: m.ClubPage })))
 const CoachesPage = React.lazy(() => import('@/pages/admin/coaches.page').then((m) => ({ default: m.CoachesPage })))
+const UsersPage = React.lazy(() => import('@/pages/admin/users.page').then((m) => ({ default: m.UsersPage })))
 const AdminAnalyticsPage = React.lazy(() => import('@/pages/admin/analytics.page').then((m) => ({ default: m.AdminAnalyticsPage })))
 
 // Player pages
@@ -43,6 +44,7 @@ const PlayerGoalsPage = React.lazy(() => import('@/pages/player/goals.page').the
 const PlayerReportsPage = React.lazy(() => import('@/pages/player/reports.page').then((m) => ({ default: m.PlayerReportsPage })))
 const PlayerMatchesPage = React.lazy(() => import('@/pages/player/matches.page').then((m) => ({ default: m.PlayerMatchesPage })))
 const PlayerMatchDetailPage = React.lazy(() => import('@/pages/player/match-detail.page').then((m) => ({ default: m.PlayerMatchDetailPage })))
+const PlayerLinkCodePage = React.lazy(() => import('@/pages/player/link-code.page').then((m) => ({ default: m.PlayerLinkCodePage })))
 
 // Parent pages
 const ParentOverviewPage = React.lazy(() => import('@/pages/parent/overview.page').then((m) => ({ default: m.ParentOverviewPage })))
@@ -126,6 +128,7 @@ export const router = createBrowserRouter(
       { path: '/admin', element: <ProtectedRoute allowedRoles={['admin']}><Navigate to={ROUTES.ADMIN_CLUB} replace /></ProtectedRoute> },
       { path: '/admin/club', element: <ProtectedRoute allowedRoles={['admin']}><Suspend><ClubPage /></Suspend></ProtectedRoute> },
       { path: '/admin/coaches', element: <ProtectedRoute allowedRoles={['admin']}><Suspend><CoachesPage /></Suspend></ProtectedRoute> },
+      { path: '/admin/users', element: <ProtectedRoute allowedRoles={['admin']}><Suspend><UsersPage /></Suspend></ProtectedRoute> },
       { path: '/admin/analytics', element: <ProtectedRoute allowedRoles={['admin']}><Suspend><AdminAnalyticsPage /></Suspend></ProtectedRoute> },
 
       // Player routes
@@ -135,6 +138,7 @@ export const router = createBrowserRouter(
       { path: '/me/reports', element: <ProtectedRoute allowedRoles={['player']}><Suspend><PlayerReportsPage /></Suspend></ProtectedRoute> },
       { path: '/me/matches', element: <ProtectedRoute allowedRoles={['player']}><Suspend><PlayerMatchesPage /></Suspend></ProtectedRoute> },
       { path: '/me/matches/:matchId', element: <ProtectedRoute allowedRoles={['player']}><Suspend><PlayerMatchDetailPage /></Suspend></ProtectedRoute> },
+      { path: '/me/link-code', element: <ProtectedRoute allowedRoles={['player']}><Suspend><PlayerLinkCodePage /></Suspend></ProtectedRoute> },
 
       // Parent routes
       { path: '/parent/overview', element: <ProtectedRoute allowedRoles={['parent']}><Suspend><ParentOverviewPage /></Suspend></ProtectedRoute> },

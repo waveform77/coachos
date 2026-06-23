@@ -5,6 +5,7 @@ export const API_TIMEOUT = 15000
 export const API_ENDPOINTS = {
   USERS: {
     BASE: '/users',
+    DETAIL: (id: string) => `/users/${id}`,
   },
   AUTH: {
     LOGIN: '/auth/login',

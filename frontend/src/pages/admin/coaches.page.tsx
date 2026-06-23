@@ -1,22 +1,40 @@
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
-import { useQuery } from '@tanstack/react-query'
-import { UserCheck, Mail, Phone } from 'lucide-react'
-import { PageHeader, Card, CardContent, Badge, Avatar, AvatarFallback, Skeleton } from '@/shared/ui'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { UserCheck, Mail, Phone, Plus } from 'lucide-react'
+import { toast } from 'sonner'
+import { PageHeader, Card, CardContent, Badge, Avatar, AvatarFallback, Skeleton, Button, Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/shared/ui'
 import { EmptyState } from '@/shared/ui/empty-state'
 import { getInitials } from '@/shared/lib/utils'
-import { authApi } from '@/shared/api/auth.api'
+import { authApi, type CreateUserRequest } from '@/shared/api/auth.api'
 import { queryKeys } from '@/shared/api/query-keys'
 import { useAuthStore } from '@/app/store/auth.store'
+import { UserForm, type UserFormValues } from '@/features/auth/user-form'
 
 export function CoachesPage() {
   const { t } = useTranslation()
   const { user } = useAuthStore()
-  const clubId = user?.clubId ?? user?.clubId
+  const qc = useQueryClient()
+  const clubId = user?.clubId ?? ''
+  const [open, setOpen] = React.useState(false)
+
   const { data: coaches, isLoading, isError, error, refetch } = useQuery({
     queryKey: queryKeys.users.list({ role: 'coach', clubId }),
     queryFn: () => authApi.listUsers({ role: 'coach', limit: 100, page: 1 }),
     enabled: !!clubId,
+  })
+
+  const { mutate: createCoach, isPending: creating } = useMutation({
+    mutationFn: (data: CreateUserRequest) => authApi.createUser(data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.users.list({ role: 'coach', clubId }) })
+      toast.success(t('common.success'))
+      setOpen(false)
+    },
+    onError: (err: unknown) => {
+      const message = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message
+      toast.error(message ?? t('common.error'))
+    },
   })
 
   if (!clubId) {
@@ -30,7 +48,26 @@ export function CoachesPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title={t('admin.coaches')} description={t('admin.coachList')} />
+      <PageHeader
+        title={t('admin.coaches')}
+        description={t('admin.coachList')}
+        actions={
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button className="gap-2"><Plus className="h-5 w-5" />{t('admin.addCoach')}</Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-lg">
+              <DialogHeader><DialogTitle>{t('admin.addCoach')}</DialogTitle></DialogHeader>
+              <UserForm
+                allowedRoles={['coach']}
+                onSubmit={(v) => createCoach({ ...v, role: 'coach' })}
+                loading={creating}
+                submitLabel={t('common.create')}
+              />
+            </DialogContent>
+          </Dialog>
+        }
+      />
 
       {isError ? (
         <EmptyState

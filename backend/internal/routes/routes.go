@@ -56,8 +56,11 @@ func RegisterRoutes(
 	// Users (register /me before / so it is never shadowed by a catch-all)
 	users := v1.Group("/users", auth)
 	users.Get("/me", authH.Me)
-	users.Get("/", adminOnly, authH.ListUsers)
 	users.Patch("/me", authH.UpdateMe)
+	users.Get("/", adminOnly, authH.ListUsers)
+	users.Post("/", adminOnly, authH.CreateUser)
+	users.Get("/:id", adminOnly, authH.GetUser)
+	users.Patch("/:id", adminOnly, authH.UpdateUser)
 
 	// Clubs
 	clubs := v1.Group("/clubs", auth)
@@ -135,10 +138,10 @@ func RegisterRoutes(
 	matches.Get("/:id/summary", matchH.GetSummary)
 
 	// Parent portal
-	parent := v1.Group("/parent", auth, parentOnly)
-	parent.Get("/children", parentH.ListChildren)
-	parent.Post("/accept-invitation", parentH.AcceptInvitation) // Вариант A: принять приглашение
-	parent.Post("/use-link-code", parentH.UseLinkCode)           // Вариант C: использовать код
+	parent := v1.Group("/parent", auth)
+	parent.Get("/children", parentOnly, parentH.ListChildren)
+	parent.Post("/accept-invitation", parentOnly, parentH.AcceptInvitation) // Вариант A: принять приглашение
+	parent.Post("/use-link-code", middleware.RequireRole(domain.RoleParent, domain.RolePlayer), parentH.UseLinkCode) // Вариант C: использовать код
 
 	// Coach parent linking management
 	coachParent := v1.Group("/coach", auth, coachOrAdmin)

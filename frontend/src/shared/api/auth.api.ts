@@ -3,7 +3,16 @@ import { API_ENDPOINTS } from '../config/api'
 import type { User } from '../types'
 
 export interface LoginRequest { email: string; password: string }
-export interface RegisterRequest { email: string; password: string; firstName: string; lastName: string; role: string }
+export interface RegisterRequest {
+  email: string
+  password: string
+  firstName: string
+  lastName: string
+  role: string
+  createClub?: { name: string; city?: string; country?: string }
+}
+export interface CreateUserRequest { email: string; password: string; firstName: string; lastName: string; role: string; phone?: string }
+export interface UpdateUserRequest { firstName?: string; lastName?: string; phone?: string; role?: string; password?: string; isActive?: boolean }
 export interface AuthResponse { user: User; accessToken: string }
 
 export const authApi = {
@@ -34,4 +43,12 @@ export const authApi = {
     }
     return data
   },
+
+  /** Admin: create a user inside the admin's club. */
+  createUser: (data: CreateUserRequest) =>
+    apiClient.post<User>(API_ENDPOINTS.USERS.BASE, data).then((r) => r.data),
+
+  /** Admin: update a user inside the admin's club. */
+  updateUser: (id: string, data: UpdateUserRequest) =>
+    apiClient.patch<User>(API_ENDPOINTS.USERS.DETAIL(id), data).then((r) => r.data),
 }

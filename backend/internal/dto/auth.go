@@ -4,12 +4,13 @@ import "github.com/coachos/backend/internal/domain"
 
 // RegisterRequest holds data for user registration.
 type RegisterRequest struct {
-	Email     string      `json:"email" validate:"required,email,max=255"`
-	Password  string      `json:"password" validate:"required,min=8,max=100"`
-	FirstName string      `json:"firstName" validate:"required,min=1,max=100"`
-	LastName  string      `json:"lastName" validate:"required,min=1,max=100"`
-	Role      domain.Role `json:"role" validate:"required,role"`
-	ClubID    string      `json:"clubID" validate:"omitempty,uuid"`
+	Email      string             `json:"email" validate:"required,email,max=255"`
+	Password   string             `json:"password" validate:"required,min=8,max=100"`
+	FirstName  string             `json:"firstName" validate:"required,min=1,max=100"`
+	LastName   string             `json:"lastName" validate:"required,min=1,max=100"`
+	Role       domain.Role        `json:"role" validate:"required,role"`
+	ClubID     string             `json:"clubID" validate:"omitempty,uuid"`
+	CreateClub *CreateClubRequest `json:"createClub" validate:"omitempty"`
 }
 
 // LoginRequest holds credentials for user login.

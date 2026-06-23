@@ -18,6 +18,7 @@ type AuthService struct {
 	userRepo         repository.UserRepository
 	refreshTokenRepo repository.RefreshTokenRepository
 	coachProfileRepo repository.CoachProfileRepository
+	clubRepo         repository.ClubRepository
 	jwtCfg           config.JWTConfig
 }
 
@@ -26,21 +27,44 @@ func NewAuthService(
 	userRepo repository.UserRepository,
 	refreshTokenRepo repository.RefreshTokenRepository,
 	coachProfileRepo repository.CoachProfileRepository,
+	clubRepo repository.ClubRepository,
 	jwtCfg config.JWTConfig,
 ) *AuthService {
 	return &AuthService{
 		userRepo:         userRepo,
 		refreshTokenRepo: refreshTokenRepo,
 		coachProfileRepo: coachProfileRepo,
+		clubRepo:         clubRepo,
 		jwtCfg:           jwtCfg,
 	}
 }
 
 // Register creates a new user account.
 func (s *AuthService) Register(ctx context.Context, email, password, firstName, lastName string, role domain.Role, clubID *string) (*domain.User, error) {
+	return s.RegisterWithClub(ctx, email, password, firstName, lastName, role, clubID, nil)
+}
+
+// RegisterWithClub creates a new user account, optionally creating a club.
+func (s *AuthService) RegisterWithClub(ctx context.Context, email, password, firstName, lastName string, role domain.Role, clubID *string, createClubReq *dto.CreateClubRequest) (*domain.User, error) {
 	existing, err := s.userRepo.FindByEmail(ctx, email)
 	if err == nil && existing != nil {
 		return nil, domain.NewConflict("email already registered")
+	}
+
+	var finalClubID *string
+	if createClubReq != nil {
+		club := &domain.Club{
+			Name:    createClubReq.Name,
+			Country: createClubReq.Country,
+			City:    createClubReq.City,
+		}
+		if err := s.clubRepo.Create(ctx, club); err != nil {
+			return nil, err
+		}
+		finalClubID = &club.ID
+		role = domain.RoleAdmin
+	} else {
+		finalClubID = clubID
 	}
 
 	hashedPwd, err := hash.HashPassword(password)
@@ -52,7 +76,7 @@ func (s *AuthService) Register(ctx context.Context, email, password, firstName, 
 		Email:        email,
 		PasswordHash: hashedPwd,
 		Role:         role,
-		ClubID:       clubID,
+		ClubID:       finalClubID,
 		FirstName:    firstName,
 		LastName:     lastName,
 		IsActive:     true,
@@ -221,4 +245,97 @@ func (s *AuthService) ListUsersByClubAndRole(ctx context.Context, clubID string,
 	}
 	users, _, err := s.userRepo.List(ctx, clubID, role, page, limit)
 	return users, err
+}
+
+// CreateUserByAdmin creates a new user inside the admin's club.
+func (s *AuthService) CreateUserByAdmin(ctx context.Context, adminClubID string, req dto.CreateUserRequest) (*domain.User, error) {
+	if adminClubID == "" {
+		return nil, domain.NewBadRequest("admin is not associated with a club")
+	}
+	if req.Role == domain.RoleAdmin {
+		return nil, domain.NewForbidden("cannot create additional admins")
+	}
+
+	existing, err := s.userRepo.FindByEmail(ctx, req.Email)
+	if err == nil && existing != nil {
+		return nil, domain.NewConflict("email already registered")
+	}
+
+	hashedPwd, err := hash.HashPassword(req.Password)
+	if err != nil {
+		return nil, err
+	}
+
+	user := &domain.User{
+		Email:        req.Email,
+		PasswordHash: hashedPwd,
+		Role:         req.Role,
+		ClubID:       &adminClubID,
+		FirstName:    req.FirstName,
+		LastName:     req.LastName,
+		Phone:        req.Phone,
+		IsActive:     true,
+	}
+
+	if err := s.userRepo.Create(ctx, user); err != nil {
+		return nil, err
+	}
+
+	if req.Role == domain.RoleCoach {
+		profile := &domain.CoachProfile{
+			UserID:       user.ID,
+			LicenseLevel: domain.LicenseLevelNone,
+		}
+		_ = s.coachProfileRepo.Create(ctx, profile)
+	}
+
+	return user, nil
+}
+
+// FindUserByID returns a user by ID.
+func (s *AuthService) FindUserByID(ctx context.Context, userID string) (*domain.User, error) {
+	return s.userRepo.FindByID(ctx, userID)
+}
+
+// UpdateUserByAdmin updates a user within the admin's club.
+func (s *AuthService) UpdateUserByAdmin(ctx context.Context, adminClubID, userID string, req dto.UpdateUserRequest) (*domain.User, error) {
+	if adminClubID == "" {
+		return nil, domain.NewBadRequest("admin is not associated with a club")
+	}
+
+	user, err := s.userRepo.FindByID(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	if user.ClubID == nil || *user.ClubID != adminClubID {
+		return nil, domain.NewForbidden("user does not belong to admin's club")
+	}
+
+	if req.FirstName != "" {
+		user.FirstName = req.FirstName
+	}
+	if req.LastName != "" {
+		user.LastName = req.LastName
+	}
+	if req.Phone != "" {
+		user.Phone = req.Phone
+	}
+	if req.Role != "" {
+		user.Role = req.Role
+	}
+	if req.IsActive != nil {
+		user.IsActive = *req.IsActive
+	}
+	if req.Password != "" {
+		hashedPwd, err := hash.HashPassword(req.Password)
+		if err != nil {
+			return nil, err
+		}
+		user.PasswordHash = hashedPwd
+	}
+
+	if err := s.userRepo.Update(ctx, user); err != nil {
+		return nil, err
+	}
+	return user, nil
 }

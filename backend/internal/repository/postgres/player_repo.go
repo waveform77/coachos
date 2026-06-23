@@ -66,3 +66,17 @@ func (r *playerRepo) UpdateDevIndex(ctx context.Context, playerID string, index 
 		Where("id = ?", playerID).
 		Update("dev_index", index).Error
 }
+
+func (r *playerRepo) LinkPlayerToUser(ctx context.Context, playerID, userID string) error {
+	return r.db.WithContext(ctx).Model(&domain.Player{}).
+		Where("id = ?", playerID).
+		Update("user_id", userID).Error
+}
+
+func (r *playerRepo) IsPlayerLinked(ctx context.Context, playerID string) (bool, error) {
+	var count int64
+	err := r.db.WithContext(ctx).Model(&domain.Player{}).
+		Where("id = ? AND user_id IS NOT NULL", playerID).
+		Count(&count).Error
+	return count > 0, err
+}

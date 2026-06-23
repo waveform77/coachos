@@ -23,7 +23,7 @@ func NewAuthHandler(authService *service.AuthService) *AuthHandler {
 
 // Register handles POST /api/v1/auth/register.
 // @Summary Register new user
-// @Description Create a new user account
+// @Description Create a new user account and authenticate the user
 // @Tags auth
 // @Accept json
 // @Produce json
@@ -40,23 +40,56 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 		return err
 	}
 
-	user, err := h.authService.Register(
+	var clubID *string
+	if req.ClubID != "" {
+		clubID = &req.ClubID
+	}
+
+	user, err := h.authService.RegisterWithClub(
 		c.UserContext(),
 		req.Email, req.Password, req.FirstName, req.LastName,
-		domain.Role(req.Role), nil,
+		domain.Role(req.Role), clubID, req.CreateClub,
 	)
 	if err != nil {
 		return err
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(dto.UserResponse{
-		ID:        user.ID,
-		Email:     user.Email,
-		Role:      user.Role,
-		FirstName: user.FirstName,
-		LastName:  user.LastName,
-		IsActive:  user.IsActive,
-		CreatedAt: user.CreatedAt,
+	// Auto-login after successful registration.
+	loggedInUser, accessToken, refreshToken, err := h.authService.Login(
+		c.UserContext(),
+		req.Email, req.Password,
+		c.IP(), c.Get("User-Agent"),
+	)
+	if err != nil {
+		return err
+	}
+	_ = user // original registration result no longer needed
+
+	c.Cookie(&fiber.Cookie{
+		Name:     "refresh_token",
+		Value:    refreshToken,
+		HTTPOnly: true,
+		Secure:   false,
+		SameSite: "Lax",
+		Expires:  time.Now().Add(30 * 24 * time.Hour),
+		Path:     "/",
+	})
+
+	return c.Status(fiber.StatusCreated).JSON(dto.AuthResponse{
+		AccessToken: accessToken,
+		User: dto.UserResponse{
+			ID:          loggedInUser.ID,
+			Email:       loggedInUser.Email,
+			Role:        loggedInUser.Role,
+			ClubID:      loggedInUser.ClubID,
+			FirstName:   loggedInUser.FirstName,
+			LastName:    loggedInUser.LastName,
+			Phone:       loggedInUser.Phone,
+			AvatarURL:   loggedInUser.AvatarURL,
+			IsActive:    loggedInUser.IsActive,
+			LastLoginAt: loggedInUser.LastLoginAt,
+			CreatedAt:   loggedInUser.CreatedAt,
+		},
 	})
 }
 
@@ -252,4 +285,68 @@ func (h *AuthHandler) ListUsers(c *fiber.Ctx) error {
 		out = append(out, dto.ToUserResponse(&users[i]))
 	}
 	return c.JSON(out)
+}
+
+// CreateUser handles POST /api/v1/users (admin only).
+func (h *AuthHandler) CreateUser(c *fiber.Ctx) error {
+	claims := c.Locals("user").(*pkgjwt.Claims)
+	if claims.ClubID == "" {
+		return domain.NewBadRequest("user is not associated with a club")
+	}
+
+	var req dto.CreateUserRequest
+	if err := c.BodyParser(&req); err != nil {
+		return domain.NewBadRequest("invalid request body")
+	}
+	if err := validator.Validate(req); err != nil {
+		return err
+	}
+
+	user, err := h.authService.CreateUserByAdmin(c.UserContext(), claims.ClubID, req)
+	if err != nil {
+		return err
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(dto.ToUserResponse(user))
+}
+
+// GetUser handles GET /api/v1/users/:id (admin only).
+func (h *AuthHandler) GetUser(c *fiber.Ctx) error {
+	claims := c.Locals("user").(*pkgjwt.Claims)
+	if claims.ClubID == "" {
+		return domain.NewBadRequest("user is not associated with a club")
+	}
+
+	user, err := h.authService.FindUserByID(c.UserContext(), c.Params("id"))
+	if err != nil {
+		return err
+	}
+	if user.ClubID == nil || *user.ClubID != claims.ClubID {
+		return domain.NewForbidden("user does not belong to admin's club")
+	}
+
+	return c.JSON(dto.ToUserResponse(user))
+}
+
+// UpdateUser handles PATCH /api/v1/users/:id (admin only).
+func (h *AuthHandler) UpdateUser(c *fiber.Ctx) error {
+	claims := c.Locals("user").(*pkgjwt.Claims)
+	if claims.ClubID == "" {
+		return domain.NewBadRequest("user is not associated with a club")
+	}
+
+	var req dto.UpdateUserRequest
+	if err := c.BodyParser(&req); err != nil {
+		return domain.NewBadRequest("invalid request body")
+	}
+	if err := validator.Validate(req); err != nil {
+		return err
+	}
+
+	user, err := h.authService.UpdateUserByAdmin(c.UserContext(), claims.ClubID, c.Params("id"), req)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(dto.ToUserResponse(user))
 }

@@ -53,6 +53,10 @@ type PlayerRepository interface {
 	Update(ctx context.Context, player *domain.Player) error
 	Delete(ctx context.Context, id string) error
 	UpdateDevIndex(ctx context.Context, playerID string, index float64) error
+	// LinkPlayerToUser links an existing player card to a user account.
+	LinkPlayerToUser(ctx context.Context, playerID, userID string) error
+	// IsPlayerLinked reports whether the player card already has a linked user.
+	IsPlayerLinked(ctx context.Context, playerID string) (bool, error)
 }
 
 // ParentRepository defines persistence operations for parents.

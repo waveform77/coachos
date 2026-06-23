@@ -93,7 +93,7 @@ func main() {
 	}
 
 	// 7. Init services
-	authSvc := service.NewAuthService(userRepo, refreshTokenRepo, coachProfileRepo, cfg.JWT)
+	authSvc := service.NewAuthService(userRepo, refreshTokenRepo, coachProfileRepo, clubRepo, cfg.JWT)
 	clubSvc := service.NewClubService(clubRepo, teamRepo, playerRepo, userRepo, sessionRepo, attendanceRepo)
 	teamSvc := service.NewTeamService(teamRepo, sessionRepo)
 	playerSvc := service.NewPlayerService(playerRepo, assessmentRepo, attendanceRepo, goalRepo)
@@ -104,7 +104,7 @@ func main() {
 	analyticsSvc := service.NewAnalyticsService(sessionRepo, teamRepo, playerRepo, attendanceRepo, assessmentRepo, matchRepo, goalRepo, parentRepo)
 	aiSvc := service.NewAIService(aiProvider, aiRepo, playerRepo, assessmentRepo, attendanceRepo, goalRepo, exerciseRepo, inAppNotifier)
 	notifSvc := service.NewNotificationService(notifRepo)
-	parentSvc := service.NewParentService(parentRepo, playerRepo, inAppNotifier)
+	parentSvc := service.NewParentService(parentRepo, playerRepo, userRepo, inAppNotifier)
 
 	// 8. Init handlers
 	healthH := handler.NewHealthHandler("1.0.0")

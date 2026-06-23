@@ -17,6 +17,7 @@ import (
 type ParentService struct {
 	parentRepo repository.ParentRepository
 	playerRepo repository.PlayerRepository
+	userRepo   repository.UserRepository
 	notifier   Notifier
 }
 
@@ -27,10 +28,11 @@ type Notifier interface {
 }
 
 // NewParentService creates a new ParentService.
-func NewParentService(parentRepo repository.ParentRepository, playerRepo repository.PlayerRepository, notifier Notifier) *ParentService {
+func NewParentService(parentRepo repository.ParentRepository, playerRepo repository.PlayerRepository, userRepo repository.UserRepository, notifier Notifier) *ParentService {
 	return &ParentService{
 		parentRepo: parentRepo,
 		playerRepo: playerRepo,
+		userRepo:   userRepo,
 		notifier:   notifier,
 	}
 }
@@ -203,7 +205,7 @@ func (s *ParentService) GenerateLinkCode(ctx context.Context, playerID string, c
 	return lc, nil
 }
 
-// UseLinkCode использует код для связывания (родитель вызывает)
+// UseLinkCode использует код для связывания (родитель или игрок вызывает)
 func (s *ParentService) UseLinkCode(ctx context.Context, code string, claims *pkgjwt.Claims) (*domain.Player, error) {
 	lc, err := s.parentRepo.GetLinkCodeByCode(ctx, code)
 	if err != nil {
@@ -220,47 +222,92 @@ func (s *ParentService) UseLinkCode(ctx context.Context, code string, claims *pk
 		return nil, domain.NewBadRequest("code expired")
 	}
 
-	// Проверяем не связан ли уже
-	alreadyLinked, err := s.parentRepo.IsParentLinkedToPlayer(ctx, claims.UserID, lc.PlayerID)
-	if err != nil {
-		return nil, err
-	}
-	if alreadyLinked {
-		return nil, domain.NewBadRequest("already linked to this player")
-	}
-
-	// Получаем или создаем запись родителя
-	parent, err := s.parentRepo.FindByUserID(ctx, claims.UserID)
+	// Получаем игрока для ответа и проверок
+	player, err := s.playerRepo.FindByID(ctx, lc.PlayerID)
 	if err != nil {
 		return nil, err
 	}
 
-	var parentID string
-	if parent == nil {
-		parent = &domain.Parent{
-			UserID:   &claims.UserID,
-			FullName: claims.FirstName + " " + claims.LastName,
-			Email:    claims.Email,
-		}
-		if err := s.parentRepo.Create(ctx, parent); err != nil {
+	// Проверяем принадлежность к клубу
+	if claims.ClubID != "" && player.ClubID != claims.ClubID {
+		return nil, domain.NewForbidden("player does not belong to your club")
+	}
+
+	role := domain.Role(claims.Role)
+
+	switch role {
+	case domain.RolePlayer:
+		// Игрок связывает свою учетную запись с карточкой игрока
+		alreadyLinked, err := s.playerRepo.IsPlayerLinked(ctx, lc.PlayerID)
+		if err != nil {
 			return nil, err
 		}
-	}
-	parentID = parent.ID
+		if alreadyLinked {
+			return nil, domain.NewBadRequest("player card already linked to another account")
+		}
 
-	// Создаем связь
-	if err := s.parentRepo.LinkToPlayer(ctx, lc.PlayerID, parentID); err != nil {
-		return nil, err
+		// Опционально: проверяем что пользователь еще не привязан к другой карточке
+		existing, _ := s.playerRepo.FindByUserID(ctx, claims.UserID)
+		if existing != nil {
+			return nil, domain.NewBadRequest("your account is already linked to a player profile")
+		}
+
+		if err := s.playerRepo.LinkPlayerToUser(ctx, lc.PlayerID, claims.UserID); err != nil {
+			return nil, err
+		}
+
+		// Привязываем пользователя к клубу игрока, если ещё не привязан
+		if claims.ClubID == "" {
+			user, err := s.userRepo.FindByID(ctx, claims.UserID)
+			if err != nil {
+				return nil, err
+			}
+			if user.ClubID == nil || *user.ClubID == "" {
+				user.ClubID = &player.ClubID
+				if err := s.userRepo.Update(ctx, user); err != nil {
+					return nil, err
+				}
+			}
+		}
+
+	case domain.RoleParent:
+		// Родитель связывается с игроком через таблицу player_parents
+		alreadyLinked, err := s.parentRepo.IsParentLinkedToPlayer(ctx, claims.UserID, lc.PlayerID)
+		if err != nil {
+			return nil, err
+		}
+		if alreadyLinked {
+			return nil, domain.NewBadRequest("already linked to this player")
+		}
+
+		parent, err := s.parentRepo.FindByUserID(ctx, claims.UserID)
+		if err != nil {
+			return nil, err
+		}
+
+		var parentID string
+		if parent == nil {
+			parent = &domain.Parent{
+				UserID:   &claims.UserID,
+				FullName: claims.FirstName + " " + claims.LastName,
+				Email:    claims.Email,
+			}
+			if err := s.parentRepo.Create(ctx, parent); err != nil {
+				return nil, err
+			}
+		}
+		parentID = parent.ID
+
+		if err := s.parentRepo.LinkToPlayer(ctx, lc.PlayerID, parentID); err != nil {
+			return nil, err
+		}
+
+	default:
+		return nil, domain.NewForbidden("only player or parent can use a link code")
 	}
 
 	// Отмечаем код использованным
 	if err := s.parentRepo.MarkLinkCodeUsed(ctx, lc.ID, claims.UserID); err != nil {
-		return nil, err
-	}
-
-	// Получаем игрока для ответа
-	player, err := s.playerRepo.FindByID(ctx, lc.PlayerID)
-	if err != nil {
 		return nil, err
 	}
 

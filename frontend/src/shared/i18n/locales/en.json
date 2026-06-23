@@ -111,6 +111,7 @@
     },
     "admin": {
       "dashboard": "Dashboard",
+      "users": "Users",
       "teams": "Teams",
       "players": "Players",
       "coaches": "Coaches",
@@ -121,7 +122,8 @@
       "matches": "Matches",
       "progress": "Progress",
       "goals": "Goals",
-      "reports": "Reports"
+      "reports": "Reports",
+      "linkProfile": "Link Profile"
     },
     "parent": {
       "overview": "Overview",
@@ -811,6 +813,15 @@
     "noLinkedPlayers": "No children linked yet",
     "linkChild": "Link a Child",
     "linkChildDesc": "Enter the code from your coach to link with your child"
+  },
+  "player": {
+    "linkProfile": "Link Profile",
+    "linkProfileDescription": "Enter the 6-digit code provided by your coach to link your account with your player card",
+    "linkProfileDesc": "Enter the code from your coach to link your profile",
+    "enterCodePlaceholder": "Enter 6-digit code...",
+    "codeLinked": "Profile linked!",
+    "codeLinkedDesc": "You are now linked to {{name}}",
+    "invalidCode": "Invalid or expired code"
   },
   "playerPortal": {
     "matches": "Matches",

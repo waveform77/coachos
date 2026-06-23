@@ -8,6 +8,7 @@ export const ROUTES = {
   PROFILE: '/profile',
   DASHBOARD: '/dashboard',
   ADMIN_CLUB: '/admin/club',
+  ADMIN_USERS: '/admin/users',
   COACH_COMMAND_CENTER: '/coach',
   COACH_ANALYTICS: '/coach/analytics',
   PLAYER_SCHEDULE: '/me/schedule',

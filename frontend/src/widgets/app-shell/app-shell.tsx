@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import {
   LayoutDashboard, Users, Calendar, Dumbbell, ClipboardCheck, BarChart3,
   Brain, Trophy, UserCheck, Target, BookOpen, Home, Building2,
-  Star, TrendingUp, FileText, KeyRound, ClipboardList,
+  Star, TrendingUp, FileText, KeyRound, ClipboardList, Shield,
 } from 'lucide-react'
 import { useAuthStore } from '@/app/store/auth.store'
 import { Link } from 'react-router-dom'
@@ -34,6 +34,7 @@ function getNavItems(role: string, t: TFunction): NavItem[] {
     case 'admin':
       return [
         { label: t('nav.admin.dashboard'), href: '/admin/club', icon: Building2 },
+        { label: t('nav.admin.users'), href: '/admin/users', icon: Shield },
         { label: t('nav.admin.teams'), href: '/coach/teams', icon: Users },
         { label: t('nav.admin.players'), href: '/coach/players', icon: UserCheck },
         { label: t('nav.admin.coaches'), href: '/admin/coaches', icon: UserCheck },
@@ -46,6 +47,7 @@ function getNavItems(role: string, t: TFunction): NavItem[] {
         { label: t('nav.player.progress'), href: '/me/progress', icon: TrendingUp },
         { label: t('nav.player.goals'), href: '/me/goals', icon: Target },
         { label: t('nav.player.reports'), href: '/me/reports', icon: FileText },
+        { label: t('nav.player.linkProfile'), href: '/me/link-code', icon: KeyRound },
       ]
     case 'parent':
       return [

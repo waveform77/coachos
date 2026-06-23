@@ -5,13 +5,13 @@ import { z } from 'zod'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
-import { Loader2, Mail, Lock, User } from 'lucide-react'
+import { Loader2, Mail, Lock, User, Building2 } from 'lucide-react'
 import { authApi } from '@/shared/api/auth.api'
 import { useAuthStore } from '@/app/store/auth.store'
 import { ROLE_DEFAULT_ROUTES } from '@/shared/config/roles'
 import {
   Button, Form, FormControl, FormField, FormItem, FormLabel, FormMessage, Input,
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Checkbox,
 } from '@/shared/ui'
 
 export function RegisterForm() {
@@ -30,10 +30,18 @@ export function RegisterForm() {
           password: z.string().min(8, t('validation.passwordMin8')),
           confirmPassword: z.string(),
           role: z.enum(['coach', 'player', 'parent']),
+          createClub: z.boolean(),
+          clubName: z.string().optional(),
+          clubCity: z.string().optional(),
+          clubCountry: z.string().optional(),
         })
         .refine((d) => d.password === d.confirmPassword, {
           message: t('validation.passwordsNoMatch'),
           path: ['confirmPassword'],
+        })
+        .refine((d) => !d.createClub || (d.clubName && d.clubName.trim().length > 0), {
+          message: 'Название клуба обязательно',
+          path: ['clubName'],
         }),
     [t]
   )
@@ -42,13 +50,38 @@ export function RegisterForm() {
 
   const form = useForm<RegisterValues>({
     resolver: zodResolver(registerSchema),
-    defaultValues: { firstName: '', lastName: '', email: '', password: '', confirmPassword: '', role: 'coach' },
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      role: 'coach',
+      createClub: false,
+      clubName: '',
+      clubCity: '',
+      clubCountry: '',
+    },
   })
+
+  const createClub = form.watch('createClub')
 
   const onSubmit = async (values: RegisterValues) => {
     setLoading(true)
     try {
-      const { confirmPassword: _, ...payload } = values
+      const { confirmPassword, clubName, clubCity, clubCountry, createClub, ...rest } = values
+      void confirmPassword
+      const payload: Parameters<typeof authApi.register>[0] = {
+        ...rest,
+        role: createClub ? 'admin' : values.role,
+      }
+      if (createClub) {
+        payload.createClub = {
+          name: clubName?.trim() ?? '',
+          city: clubCity?.trim(),
+          country: clubCountry?.trim(),
+        }
+      }
       const data = await authApi.register(payload)
       setAuth(data.user, data.accessToken)
       toast.success(t('auth.welcomeToast', { name: data.user.firstName }))
@@ -104,24 +137,70 @@ export function RegisterForm() {
             <FormMessage />
           </FormItem>
         )} />
-        <FormField control={form.control} name="role" render={({ field }) => (
-          <FormItem>
-            <FormLabel className="text-slate-300">{t('auth.rolePrompt')}</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
-              <FormControl>
-                <SelectTrigger className="border-white/10 bg-white/5 text-white">
-                  <SelectValue />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                <SelectItem value="coach">{t('auth.roleCoach')}</SelectItem>
-                <SelectItem value="player">{t('auth.rolePlayer')}</SelectItem>
-                <SelectItem value="parent">{t('auth.roleParent')}</SelectItem>
-              </SelectContent>
-            </Select>
-            <FormMessage />
+        {!createClub && (
+          <FormField control={form.control} name="role" render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-slate-300">{t('auth.rolePrompt')}</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger className="border-white/10 bg-white/5 text-white">
+                    <SelectValue />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="coach">{t('auth.roleCoach')}</SelectItem>
+                  <SelectItem value="player">{t('auth.rolePlayer')}</SelectItem>
+                  <SelectItem value="parent">{t('auth.roleParent')}</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )} />
+        )}
+
+        <FormField control={form.control} name="createClub" render={({ field }) => (
+          <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-white/10 p-4">
+            <FormControl>
+              <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+            </FormControl>
+            <div className="space-y-1 leading-none">
+              <FormLabel className="text-slate-200">Создать новый клуб</FormLabel>
+              <p className="text-sm text-slate-400">Станете администратором новой академии</p>
+            </div>
           </FormItem>
         )} />
+
+        {createClub && (
+          <div className="space-y-4 rounded-lg border border-white/10 bg-white/5 p-4">
+            <div className="flex items-center gap-2 text-slate-200">
+              <Building2 className="h-4 w-4" />
+              <span className="font-medium">Данные клуба</span>
+            </div>
+            <FormField control={form.control} name="clubName" render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-slate-300">Название клуба *</FormLabel>
+                <FormControl><Input placeholder="FC Dynamo Academy" className={inputClass} {...field} /></FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
+            <div className="grid grid-cols-2 gap-4">
+              <FormField control={form.control} name="clubCity" render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-slate-300">Город</FormLabel>
+                  <FormControl><Input placeholder="Москва" className={inputClass} {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <FormField control={form.control} name="clubCountry" render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-slate-300">Страна</FormLabel>
+                  <FormControl><Input placeholder="Россия" className={inputClass} {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+            </div>
+          </div>
+        )}
         <FormField control={form.control} name="password" render={({ field }) => (
           <FormItem>
             <FormLabel className="text-slate-300">{t('auth.password')}</FormLabel>
