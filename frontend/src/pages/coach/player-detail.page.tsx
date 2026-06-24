@@ -416,7 +416,7 @@ export function PlayerDetailPage() {
         </TabsContent>
 
         <TabsContent value="parents" className="mt-4">
-          <ParentLinkingSection playerId={playerId!} />
+          <ParentLinkingSection playerId={playerId!} isLinked={!!player.userID} />
         </TabsContent>
 
         <TabsContent value="notes" className="mt-4">

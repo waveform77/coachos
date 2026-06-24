@@ -14,9 +14,10 @@ import { toast } from 'sonner'
 
 type ParentLinkingSectionProps = {
   playerId: string
+  isLinked?: boolean
 }
 
-export function ParentLinkingSection({ playerId }: ParentLinkingSectionProps) {
+export function ParentLinkingSection({ playerId, isLinked = false }: ParentLinkingSectionProps) {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
   const [email, setEmail] = React.useState('')
@@ -75,6 +76,16 @@ export function ParentLinkingSection({ playerId }: ParentLinkingSectionProps) {
 
   const pendingInvitations = invitationsData?.invitations?.filter((i) => i.status === 'pending') || []
   const activeCodes = codesData?.codes || []
+
+  if (isLinked) {
+    return (
+      <Card>
+        <CardContent className="p-6 text-center text-muted-foreground">
+          <p className="text-base">Профиль игрока уже привязан к учетной записи. Новую привязку создавать не нужно.</p>
+        </CardContent>
+      </Card>
+    )
+  }
 
   return (
     <div className="space-y-4">

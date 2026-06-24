@@ -46,6 +46,9 @@ func (s *ParentService) CreateInvitation(ctx context.Context, playerID, email st
 	if err != nil {
 		return nil, err
 	}
+	if player.UserID != nil && *player.UserID != "" {
+		return nil, domain.NewBadRequest("player card already linked to a user account")
+	}
 
 	// Проверяем нет ли уже активного приглашения
 	existing, err := s.parentRepo.GetPendingInvitationByEmail(ctx, playerID, email)
@@ -182,6 +185,9 @@ func (s *ParentService) GenerateLinkCode(ctx context.Context, playerID string, c
 	player, err := s.playerRepo.FindByID(ctx, playerID)
 	if err != nil {
 		return nil, err
+	}
+	if player.UserID != nil && *player.UserID != "" {
+		return nil, domain.NewBadRequest("player card already linked to a user account")
 	}
 
 	// Генерируем 6-значный код
