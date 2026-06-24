@@ -55,7 +55,7 @@ export function PlayerForm({ defaultValues, onSubmit, loading, teams }: PlayerFo
       heightCm: values.heightCm === '' ? undefined : Number(values.heightCm),
       weightKg: values.weightKg === '' ? undefined : Number(values.weightKg),
       // Backend expects RFC3339 timestamp for time fields — convert date input (YYYY-MM-DD)
-      birthDate: values.birthDate === '' ? undefined : new Date(values.birthDate).toISOString(),
+      birthDate: values.birthDate ? new Date(values.birthDate).toISOString() : undefined,
     }
     await onSubmit(cleaned)
   }
