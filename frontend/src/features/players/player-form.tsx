@@ -51,8 +51,11 @@ export function PlayerForm({ defaultValues, onSubmit, loading, teams }: PlayerFo
   const handleSubmit = async (values: PlayerValues) => {
     const cleaned = {
       ...values,
+      // Convert empty numeric fields to undefined so backend treats them as absent
       heightCm: values.heightCm === '' ? undefined : Number(values.heightCm),
       weightKg: values.weightKg === '' ? undefined : Number(values.weightKg),
+      // Backend expects RFC3339 timestamp for time fields — convert date input (YYYY-MM-DD)
+      birthDate: values.birthDate === '' ? undefined : new Date(values.birthDate).toISOString(),
     }
     await onSubmit(cleaned)
   }
